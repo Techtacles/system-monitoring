@@ -1,0 +1,6 @@
+.DS_Store
+*.env
+todo.txt
+env.sh
+extra_info.txt
+experiment.go
