@@ -34,7 +34,7 @@ type ProcessInfo struct {
 	Username     string
 }
 
-func (c *CpuInfo) collectCores() error {
+func (c *CpuInfo) CollectCores() error {
 	logging.Info(logtag, "collecting cpu cores")
 	physical_core_count, err := cpu.Counts(false)
 
@@ -57,7 +57,7 @@ func (c *CpuInfo) collectCores() error {
 
 }
 
-func (c *CpuInfo) collectPercentages(interval time.Duration) error {
+func (c *CpuInfo) CollectPercentages(interval time.Duration) error {
 	percentages, err := cpu.Percent(interval, true)
 
 	if err != nil {
@@ -80,7 +80,7 @@ func (c *CpuInfo) collectPercentages(interval time.Duration) error {
 	return nil
 }
 
-func (c *CpuInfo) getUser() error {
+func (c *CpuInfo) GetUser() error {
 	var cmd *exec.Cmd
 	c.getRuntime()
 
@@ -106,13 +106,11 @@ func (c *CpuInfo) getRuntime() error {
 	return nil
 }
 
-func getProcesses() ([]ProcessInfo, error) {
+func GetProcesses() ([]ProcessInfo, error) {
 	procs, err := process.Processes()
 	if err != nil {
 		return nil, err
 	}
-
-	time.Sleep(500 * time.Millisecond)
 
 	results := make([]ProcessInfo, 0, len(procs))
 
