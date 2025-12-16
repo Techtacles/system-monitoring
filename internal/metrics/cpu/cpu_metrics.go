@@ -34,7 +34,33 @@ type ProcessInfo struct {
 	Username     string
 }
 
-func (c *CpuInfo) CollectCores() error {
+func (c *CpuInfo) Collect() error {
+	all_processes, err := getProcesses()
+
+	if err != nil {
+		logging.Error(logtag, "error instantiating processes", err)
+		return err
+	}
+	c.Processes = all_processes
+
+	runtime := getRuntime()
+
+	c.Runtime = runtime
+
+	user, err := getUser()
+	if err != nil {
+		logging.Error(logtag, "error instantiating users ", err)
+		return err
+	}
+	c.User = user
+
+	c.collectCores()
+	c.collectPercentages(0)
+
+	return nil
+}
+
+func (c *CpuInfo) collectCores() error {
 	logging.Info(logtag, "collecting cpu cores")
 	physical_core_count, err := cpu.Counts(false)
 
@@ -57,7 +83,7 @@ func (c *CpuInfo) CollectCores() error {
 
 }
 
-func (c *CpuInfo) CollectPercentages(interval time.Duration) error {
+func (c *CpuInfo) collectPercentages(interval time.Duration) error {
 	percentages, err := cpu.Percent(interval, true)
 
 	if err != nil {
@@ -80,11 +106,11 @@ func (c *CpuInfo) CollectPercentages(interval time.Duration) error {
 	return nil
 }
 
-func (c *CpuInfo) GetUser() error {
+func getUser() (string, error) {
 	var cmd *exec.Cmd
-	c.getRuntime()
+	runtime := getRuntime()
 
-	switch c.Runtime {
+	switch runtime {
 	case "windows":
 		cmd = exec.Command("cmd", "/C", "whoami")
 	default:
@@ -94,23 +120,23 @@ func (c *CpuInfo) GetUser() error {
 	stdout, err := cmd.Output()
 	if err != nil {
 		logging.Error(logtag, "error executing command:", err)
-		return nil
+		return "", err
 	}
 
-	c.User = string(stdout)
-	return nil
+	return string(stdout), nil
 }
 
-func (c *CpuInfo) getRuntime() error {
-	c.Runtime = runtime.GOOS
-	return nil
+func getRuntime() string {
+
+	return runtime.GOOS
 }
 
-func GetProcesses() ([]ProcessInfo, error) {
+func getProcesses() ([]ProcessInfo, error) {
 	procs, err := process.Processes()
 	if err != nil {
 		return nil, err
 	}
+	time.Sleep(500 * time.Millisecond)
 
 	results := make([]ProcessInfo, 0, len(procs))
 

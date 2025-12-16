@@ -49,12 +49,36 @@ type VirtualMemoryInfo struct {
 	Inactive       uint64
 }
 
-func (m *MemoryInfo) GetSwapMemoryInfo() error {
+func (m *MemoryInfo) Collect() error {
+	processes, err := getProcesses()
+
+	if err != nil {
+		logging.Error(logtag, "error instantiating memory processes", err)
+		return err
+	}
+
+	m.ProcessInfo = processes
+
+	m.getSwapMemoryInfo()
+
+	vm, err := getVirtualMemoryInfo()
+	if err != nil {
+		logging.Error(logtag, "error instantiating virtual mem", err)
+		return err
+	}
+
+	m.Vmemory = vm
+
+	return nil
+}
+
+func (m *MemoryInfo) getSwapMemoryInfo() error {
 	swap_memory_info, err := mem.SwapMemory()
 	if err != nil {
 		logging.Error(logtag, "unable to get swap memory info", err)
 		return err
 	}
+
 	m.SwapMemoryTotal = swap_memory_info.Total
 	m.SwapMemoryUsed = swap_memory_info.Used
 	m.SwapMemoryFree = swap_memory_info.Free
@@ -64,32 +88,38 @@ func (m *MemoryInfo) GetSwapMemoryInfo() error {
 
 }
 
-func (v *VirtualMemoryInfo) GetVirtualMemoryInfo() error {
-	vmem_stat, err := mem.VirtualMemory()
+func getVirtualMemoryInfo() (VirtualMemoryInfo, error) {
+	vmem, err := mem.VirtualMemory()
 	if err != nil {
-		logging.Error(logtag, "error retrieving virtual memory details", err)
-		return nil
+		return VirtualMemoryInfo{}, err
 	}
-	v.Available = vmem_stat.Available
-	v.Free = vmem_stat.Free
-	v.SReclaimable = vmem_stat.Sreclaimable
-	v.SUnreclaimable = vmem_stat.Sunreclaim
-	v.Shared = vmem_stat.Shared
-	v.Active = vmem_stat.Active
-	v.Inactive = vmem_stat.Inactive
-	logging.Info(logtag, "successfully parsed vmem")
-	return nil
+
+	return VirtualMemoryInfo{
+		Total:          vmem.Total,
+		Available:      vmem.Available,
+		Used:           vmem.Used,
+		UsedPercentage: vmem.UsedPercent,
+		Free:           vmem.Free,
+		Shared:         vmem.Shared,
+		SReclaimable:   vmem.Sreclaimable,
+		SUnreclaimable: vmem.Sunreclaim,
+		Active:         vmem.Active,
+		Inactive:       vmem.Inactive,
+	}, nil
 }
 
-func GetProcesses() ([]ProcessInfo, error) {
+func getProcesses() ([]ProcessInfo, error) {
 	procs, err := process.Processes()
 	if err != nil {
 		logging.Error(logtag, "error retrieving processes", err)
 		return nil, err
 	}
+
 	results := make([]ProcessInfo, 0, len(procs))
+
 	for _, proc := range procs {
 		username, err := proc.Username()
+
 		if err != nil {
 			continue
 		}
@@ -102,6 +132,7 @@ func GetProcesses() ([]ProcessInfo, error) {
 		if username == "root" || strings.HasPrefix(username, "_") {
 			continue
 		}
+
 		// we dont want to add noise by getting memory <1
 		if mempercent <= 1 {
 			continue
