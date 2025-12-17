@@ -32,7 +32,6 @@ This project provides a modular framework for gathering system telemetry. It lev
 │       ├── disk/       # Disk usage and IO stats
 │       ├── memory/     # RAM and Swap usage
 │       ├── network/    # Network interface stats
-│       └── os/         # Operating system info
 ├── main.go             # Main application entry point
 ├── experiment.go       # Experimental code snippets
 └── go.mod              # Go module definition
