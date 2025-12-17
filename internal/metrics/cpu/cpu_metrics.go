@@ -1,8 +1,6 @@
 package cpu
 
 import (
-	"os/exec"
-	"runtime"
 	"time"
 
 	"github.com/shirou/gopsutil/v4/cpu"
@@ -17,8 +15,6 @@ type CpuInfo struct {
 	LogicalCores       int
 	Percentages        []float64
 	AveragePercentages float64
-	Runtime            string
-	User               string
 	Processes          []ProcessInfo
 }
 
@@ -42,17 +38,6 @@ func (c *CpuInfo) Collect() error {
 		return err
 	}
 	c.Processes = all_processes
-
-	runtime := getRuntime()
-
-	c.Runtime = runtime
-
-	user, err := getUser()
-	if err != nil {
-		logging.Error(logtag, "error instantiating users ", err)
-		return err
-	}
-	c.User = user
 
 	c.collectCores()
 	c.collectPercentages(0)
@@ -104,31 +89,6 @@ func (c *CpuInfo) collectPercentages(interval time.Duration) error {
 	c.AveragePercentages = average
 
 	return nil
-}
-
-func getUser() (string, error) {
-	var cmd *exec.Cmd
-	runtime := getRuntime()
-
-	switch runtime {
-	case "windows":
-		cmd = exec.Command("cmd", "/C", "whoami")
-	default:
-		cmd = exec.Command("whoami")
-
-	}
-	stdout, err := cmd.Output()
-	if err != nil {
-		logging.Error(logtag, "error executing command:", err)
-		return "", err
-	}
-
-	return string(stdout), nil
-}
-
-func getRuntime() string {
-
-	return runtime.GOOS
 }
 
 func getProcesses() ([]ProcessInfo, error) {
