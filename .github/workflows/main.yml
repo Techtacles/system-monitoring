@@ -10,8 +10,6 @@ on:
      - "go.mod"
      - "go.sum"
 
-
-
 jobs:
   build:
     runs-on: ${{ matrix.os }}
