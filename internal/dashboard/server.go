@@ -65,6 +65,6 @@ func Run() error {
 		}
 	})
 
-	logging.Info(logtag, fmt.Sprintf("starting dashboard server on %s", Port))
+	logging.Info(logtag, fmt.Sprintf("starting dashboard server on http://localhost:%s", Port))
 	return http.ListenAndServe(":"+Port, nil)
 }
