@@ -92,7 +92,7 @@ go build -o sysmon main.go
 
 If your OS is Apple, and you download the binary from the latest artifact, it might sometimes get flagged. To resolve this, run the command: 
 ```bash
-xattr -d com.apple.quarantine sysmon
+xattr -d com.apple.quarantine sysmon-darwin
 ```
 Once running, open your browser and navigate to `http://localhost:8080` (or your custom port) to view the dashboard.
 
