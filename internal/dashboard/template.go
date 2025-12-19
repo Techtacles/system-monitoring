@@ -7,6 +7,7 @@ var tmpl string = `
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>System Monitor</title>
+    <link rel="icon" type="image/png" href="/images/logo.png">
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
     <style>
@@ -172,12 +173,30 @@ var tmpl string = `
             font-size: 0.8rem;
             background: #334155;
         }
+        .logo-container {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+        }
+
+        .logo {
+            height: 40px;
+            width: auto;
+        }
+
+        header h1 {
+            margin: 0;
+            /* Remove previous margin if any to align nicely */
+        }
     </style>
 </head>
 <body>
     <div class="container">
         <header>
-            <h1>System Monitor</h1>
+            <div class="logo-container">
+                <img src="/images/logo.png" alt="System Monitor Logo" class="logo">
+                <h1>System Monitor</h1>
+            </div>
             <div id="connection-status" class="status-badge">Live</div>
         </header>
 

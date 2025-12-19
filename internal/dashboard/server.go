@@ -1,6 +1,7 @@
 package dashboard
 
 import (
+	"embed"
 	"encoding/json"
 	"fmt"
 	"html/template"
@@ -18,6 +19,9 @@ const (
 
 var Port string = "8080"
 
+//go:embed images
+var imagesDir embed.FS
+
 // Run starts the dashboard server
 func Run() error {
 	ag := aggregator.NewAggregator()
@@ -33,6 +37,9 @@ func Run() error {
 			ag.CollectAllConcurrent()
 		}
 	}()
+
+	// Serve static images
+	http.Handle("/images/", http.FileServer(http.FS(imagesDir)))
 
 	// API Endpoint for raw metrics
 	http.HandleFunc("/api/metrics", func(w http.ResponseWriter, r *http.Request) {
