@@ -90,6 +90,10 @@ go build -o sysmon main.go
 ```
 
 
+### Running from release
+
+Go to the latest release at https://github.com/Techtacles/system-monitoring/releases
+
 If your OS is Apple, and you download the binary from the latest artifact, it might sometimes get flagged. To resolve this, run the command: 
 ```bash
 chmod +x sysmon-darwin
