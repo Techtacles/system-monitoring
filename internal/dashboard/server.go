@@ -2,6 +2,7 @@ package dashboard
 
 import (
 	"encoding/json"
+	"fmt"
 	"html/template"
 	"net/http"
 	"time"
@@ -14,6 +15,8 @@ const (
 	logtag          = "dashboard"
 	refreshInterval = 30 * time.Second // Increased frequency for "live" feel in background
 )
+
+var Port string = "8080"
 
 // Run starts the dashboard server
 func Run() error {
@@ -55,6 +58,6 @@ func Run() error {
 		}
 	})
 
-	logging.Info(logtag, "starting dashboard server on :8080")
-	return http.ListenAndServe(":8080", nil)
+	logging.Info(logtag, fmt.Sprintf("starting dashboard server on %s", Port))
+	return http.ListenAndServe(":"+Port, nil)
 }
