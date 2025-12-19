@@ -89,4 +89,9 @@ go build -o sysmon main.go
 ./sysmon start --port 5555
 ```
 
+
+If you download the binary from the latest artifact, it might sometimes get flagged. To resolve this, run the command: 
+```bash
+xattr -d com.apple.quarantine sysmon
+```
 Once running, open your browser and navigate to `http://localhost:8080` (or your custom port) to view the dashboard.
