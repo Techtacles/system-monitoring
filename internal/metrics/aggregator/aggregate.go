@@ -6,8 +6,10 @@ import (
 	"github.com/techtacles/sysmonitoring/internal/logging"
 	"github.com/techtacles/sysmonitoring/internal/metrics/cpu"
 	"github.com/techtacles/sysmonitoring/internal/metrics/disk"
+	"github.com/techtacles/sysmonitoring/internal/metrics/host"
 	"github.com/techtacles/sysmonitoring/internal/metrics/memory"
 	"github.com/techtacles/sysmonitoring/internal/metrics/network"
+	"github.com/techtacles/sysmonitoring/internal/metrics/user"
 )
 
 const logtag = "aggregator"
@@ -39,6 +41,12 @@ func (a *Aggregator) CollectAll() map[string]error {
 	if err := a.CollectNetwork(); err != nil {
 		errors["network"] = err
 	}
+	if err := a.CollectUser(); err != nil {
+		errors["user"] = err
+	}
+	if err := a.CollectHost(); err != nil {
+		errors["host"] = err
+	}
 
 	if len(errors) > 0 {
 		return errors
@@ -60,6 +68,8 @@ func (a *Aggregator) CollectAllConcurrent() map[string]error {
 		{"memory", a.CollectMemory},
 		{"disk", a.CollectDisk},
 		{"network", a.CollectNetwork},
+		{"user", a.CollectUser},
+		{"host", a.CollectHost},
 	}
 
 	for _, collector := range collectors {
@@ -147,6 +157,40 @@ func (a *Aggregator) CollectNetwork() error {
 	a.mu.Unlock()
 
 	logging.Info(logtag, "successfully collected network metrics")
+	return nil
+}
+
+func (a *Aggregator) CollectUser() error {
+	logging.Info(logtag, "collecting user metrics")
+
+	u := user.UserInfo{}
+	if err := u.Collect(); err != nil {
+		logging.Error(logtag, "error collecting user metrics", err)
+		return err
+	}
+
+	a.mu.Lock()
+	a.allMetrics["user"] = u
+	a.mu.Unlock()
+
+	logging.Info(logtag, "successfully collected user metrics")
+	return nil
+}
+
+func (a *Aggregator) CollectHost() error {
+	logging.Info(logtag, "collecting host metrics")
+
+	h := host.HostInfo{}
+	if err := h.Collect(); err != nil {
+		logging.Error(logtag, "error collecting host metrics", err)
+		return err
+	}
+
+	a.mu.Lock()
+	a.allMetrics["host"] = h
+	a.mu.Unlock()
+
+	logging.Info(logtag, "successfully collected host metrics")
 	return nil
 }
 
