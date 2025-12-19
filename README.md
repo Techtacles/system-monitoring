@@ -4,7 +4,7 @@ A lightweight, Go-based system monitoring agent designed to collect and analyze 
 
 ## Overview
 
-This project provides a modular framework for gathering system telemetry. It leverages `gopsutil` for cross-platform metric collection and includes a structured logging system. The agent is designed to be extensible, with a planned dashboard for real-time visualization.
+This project provides a modular framework for gathering system telemetry. It leverages `gopsutil` for cross-platform metric collection and includes a structured logging system. The agent is designed to be extensible, with a  dashboard for real-time visualization. This dashboard refreshes every 30 seconds.
 
 ## Features
 
