@@ -95,3 +95,12 @@ If your OS is Apple, and you download the binary from the latest artifact, it mi
 xattr -d com.apple.quarantine sysmon
 ```
 Once running, open your browser and navigate to `http://localhost:8080` (or your custom port) to view the dashboard.
+
+
+## Future enhancements
+
+- Add integrations such as prometheus and grafana
+- Add more features to the dashboard
+- Add alerting
+- Connect to slack/teams/webhook for notifications
+- Add time series analysis
