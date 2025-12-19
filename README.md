@@ -23,8 +23,10 @@ This project provides a modular framework for gathering system telemetry. It lev
 
 ```
 ├── cmd/                # Application entry points
+│   ├── cli.go          # CLI root command definition
+│   └── run.go          # 'start' command implementation
 ├── internal/           # Private application layout code
-│   ├── dashboard/      # (Planned) Visualization dashboard
+│   ├── dashboard/      # Web dashboard implementation and embedded assets
 │   ├── logging/        # Logging configuration and helpers
 │   └── metrics/        # Metric collection modules
 │       ├── aggregator/ # Aggregates collected metrics
@@ -32,6 +34,8 @@ This project provides a modular framework for gathering system telemetry. It lev
 │       ├── disk/       # Disk usage and IO stats
 │       ├── memory/     # RAM and Swap usage
 │       ├── network/    # Network interface stats
+│       ├── host/       # Host stats
+│       └── user/       # User stats
 ├── main.go             # Main application entry point
 ├── experiment.go       # Experimental code snippets
 └── go.mod              # Go module definition
@@ -43,6 +47,7 @@ This project provides a modular framework for gathering system telemetry. It lev
 - **Dependencies**: Managed via `go.mod`
   - `github.com/shirou/gopsutil/v4`
   - `github.com/rs/zerolog`
+  - `github.com/spf13/cobra`
 
 ## Installation
 
@@ -57,4 +62,31 @@ This project provides a modular framework for gathering system telemetry. It lev
    go mod download
    ```
 
+## Running the Application
 
+You can run the application directly using `go run` or by building a binary.
+
+### Using `go run`
+
+```bash
+# Start the dashboard on the default port (8080)
+go run main.go start
+
+# Start on a specific port
+go run main.go start --port 9090
+```
+
+### Building the Binary
+
+```bash
+# Build the binary
+go build -o sysmon main.go
+
+# Run the binary
+./sysmon start
+
+# Run with custom port
+./sysmon start --port 5555
+```
+
+Once running, open your browser and navigate to `http://localhost:8080` (or your custom port) to view the dashboard.
