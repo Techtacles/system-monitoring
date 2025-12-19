@@ -90,7 +90,7 @@ go build -o sysmon main.go
 ```
 
 
-If you download the binary from the latest artifact, it might sometimes get flagged. To resolve this, run the command: 
+If your OS is Apple, and you download the binary from the latest artifact, it might sometimes get flagged. To resolve this, run the command: 
 ```bash
 xattr -d com.apple.quarantine sysmon
 ```
