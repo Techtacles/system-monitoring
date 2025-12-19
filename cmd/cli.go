@@ -8,7 +8,7 @@ import (
 )
 
 var rootCmd = &cobra.Command{
-	Use:   "sysmonitoring",
+	Use:   "sysmon",
 	Short: "System Monitoring Tool",
 	Long:  `A simple system monitoring tool that provides real-time insights into system performance, resource usage, and system health.`,
 }
