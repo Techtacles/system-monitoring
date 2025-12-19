@@ -16,9 +16,16 @@ jobs:
     runs-on: ${{ matrix.os }}
     strategy:
       matrix:
-        os: ["ubuntu-latest", "macos-latest", "windows-latest"]
-        binary: ["sysmon-linux", "sysmon-darwin", "sysmon-windows.exe"]
-        go-version: ["1.24"]
+        include:
+          - os: ubuntu-latest
+            binary: sysmon-linux
+            go-version: 1.24
+          - os: macos-latest
+            binary: sysmon-darwin
+            go-version: 1.24
+          - os: windows-latest
+            binary: sysmon-windows.exe
+            go-version: 1.24
     steps:
       - uses: actions/checkout@v4
       - name: Set up Go
