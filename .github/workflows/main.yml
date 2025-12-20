@@ -9,7 +9,6 @@ on:
      - ".gitignore"
      - "go.mod"
      - "go.sum"
-     - ".github/workflows/main.yml"
 
 jobs:
   build:
