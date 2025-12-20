@@ -4,12 +4,12 @@ on:
    branches: [ "master" ]
    tags: [ "v*" ]
    paths-ignore: 
-     - "**.md"
+     - '**/**.md'
      - "internal/dashboard/images/**"
      - ".gitignore"
      - "go.mod"
      - "go.sum"
-     - "README.md"
+     - ".github/workflows/main.yml"
 
 jobs:
   build:
