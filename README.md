@@ -14,8 +14,18 @@ This project provides a modular framework for gathering system telemetry. It lev
   - Identifies resource-intensive processes (CPU usage > 0.9%).
   - Tracks process details: PID, name, user, thread count, parent/child relationships.
   
+- **Docker Monitoring** (Optional with `-d` flag):
+First, ensure that docker is running locally before running the application with the `-d` flag.
+  - **System Info**: NCPU, Memory Total, API Version, Platform.
+  - **Container Management**: Real-time status tracking (Running, Paused, Stopped).
+  - **Performance Charts**: Container distribution and Docker Disk Usage breakdown.
+  - **Detailed Insights**:
+    - **Containers**: Image names, current state, root size, and port mappings.
+    - **Images**: Repository tags, Image IDs, virtual size, and creation dates.
+    - **Volumes**: Volume names, drivers, mountpoints, and disk space usage.
+
 - **Modular Architecture**:
-  - Separation of concerns with dedicated packages for `cpu`, `memory`, `disk`, `network`, `os`, and `trace`.
+  - Separation of concerns with dedicated packages for `cpu`, `memory`, `disk`, `network`, `os`, and `docker`.
   - Built-in `aggregator` for metric consolidation.
   - Structured logging via `zerolog`.
 
@@ -35,6 +45,7 @@ This project provides a modular framework for gathering system telemetry. It lev
 │       ├── memory/     # RAM and Swap usage
 │       ├── network/    # Network interface stats
 │       ├── host/       # Host stats
+│       ├── docker/     # Docker stats
 │       └── user/       # User stats
 ├── main.go             # Main application entry point
 ├── experiment.go       # Experimental code snippets
@@ -65,6 +76,7 @@ This project provides a modular framework for gathering system telemetry. It lev
 ## Running the Application
 
 You can run the application directly using `go run` or by building a binary.
+If you specify the -d flag, the application will collect docker metrics and add them to the dashboard. Before specifying, it is important to ensure that docker is running on your local machine otherwise, it would get the non docker metrics.
 
 ### Using `go run`
 
@@ -74,6 +86,16 @@ go run main.go start
 
 # Start on a specific port
 go run main.go start --port 9090
+
+# Start and add docker metrics to the dashboard
+go run main.go start --docker 
+OR
+go run main.go start -d
+
+# Start and add docker metrics to the dashboard and run on a specific port
+go run main.go start --docker --port 9090
+OR
+go run main.go start -d -p 9090
 ```
 
 ### Building the Binary

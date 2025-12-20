@@ -6,6 +6,7 @@ import (
 	"github.com/techtacles/sysmonitoring/internal/logging"
 	"github.com/techtacles/sysmonitoring/internal/metrics/cpu"
 	"github.com/techtacles/sysmonitoring/internal/metrics/disk"
+	"github.com/techtacles/sysmonitoring/internal/metrics/docker"
 	"github.com/techtacles/sysmonitoring/internal/metrics/host"
 	"github.com/techtacles/sysmonitoring/internal/metrics/memory"
 	"github.com/techtacles/sysmonitoring/internal/metrics/network"
@@ -15,13 +16,15 @@ import (
 const logtag = "aggregator"
 
 type Aggregator struct {
-	mu         sync.RWMutex
-	allMetrics map[string]interface{}
+	mu           sync.RWMutex
+	allMetrics   map[string]interface{}
+	enableDocker bool
 }
 
-func NewAggregator() *Aggregator {
+func NewAggregator(enableDocker bool) *Aggregator {
 	return &Aggregator{
-		allMetrics: make(map[string]interface{}),
+		allMetrics:   make(map[string]interface{}),
+		enableDocker: enableDocker,
 	}
 }
 
@@ -47,6 +50,11 @@ func (a *Aggregator) CollectAll() map[string]error {
 	if err := a.CollectHost(); err != nil {
 		errors["host"] = err
 	}
+	if a.enableDocker {
+		if err := a.CollectDocker(); err != nil {
+			errors["docker"] = err
+		}
+	}
 
 	if len(errors) > 0 {
 		return errors
@@ -70,6 +78,13 @@ func (a *Aggregator) CollectAllConcurrent() map[string]error {
 		{"network", a.CollectNetwork},
 		{"user", a.CollectUser},
 		{"host", a.CollectHost},
+	}
+
+	if a.enableDocker {
+		collectors = append(collectors, struct {
+			name string
+			fn   func() error
+		}{"docker", a.CollectDocker})
 	}
 
 	for _, collector := range collectors {
@@ -191,6 +206,23 @@ func (a *Aggregator) CollectHost() error {
 	a.mu.Unlock()
 
 	logging.Info(logtag, "successfully collected host metrics")
+	return nil
+}
+
+func (a *Aggregator) CollectDocker() error {
+	logging.Info(logtag, "collecting docker metrics")
+
+	d := docker.DockerInfo{}
+	if err := d.Collect(); err != nil {
+		logging.Error(logtag, "error collecting docker metrics", err)
+		return err
+	}
+
+	a.mu.Lock()
+	a.allMetrics["docker"] = d
+	a.mu.Unlock()
+
+	logging.Info(logtag, "successfully collected docker metrics")
 	return nil
 }
 
