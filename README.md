@@ -116,6 +116,52 @@ go build -o sysmon main.go
 
 Go to the latest release at https://github.com/Techtacles/system-monitoring/releases
 
+```bash
+
+
+# Run the binary for linux
+chmod +x sysmon-linux
+
+./sysmon-linux start
+
+# Run with custom port
+./sysmon-linux start --port 5555
+OR 
+./sysmon-linux start -p 5555
+
+# Run with docker metrics
+./sysmon-linux start -d
+
+# Start and add docker metrics to the dashboard and run on a specific port
+./sysmon-linux start -d -p 5555
+
+
+#RUNNING THE BINARY for Windows
+#Run with default 8080 port
+sysmon-windows.exe start
+#Start with docker telemetry: make sure docker is running first
+sysmon-windows.exe start -d 
+#start with custom port
+sysmon-windows.exe start -p 5000
+# Start and add docker metrics to the dashboard and run on a specific port
+sysmon-windows.exe start -d -p 5000 
+
+
+#RUNNING THE BINARY for MacOS
+chmod +x sysmon-darwin
+xattr -d com.apple.quarantine sysmon-darwin
+#Run with default 8080 port
+./sysmon-darwin start
+#Start with docker telemetry: make sure docker is running first
+./sysmon-darwin start -d
+#start with custom port
+./sysmon-darwin start -p 5555
+
+# Start and add docker metrics to the dashboard and run on a specific port
+./sysmon-darwin start -d -p 5555
+
+```
+
 If your OS is Apple, and you download the binary from the latest artifact, it might sometimes get flagged. To resolve this, run the command: 
 ```bash
 chmod +x sysmon-darwin
