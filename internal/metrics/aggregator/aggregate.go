@@ -16,13 +16,15 @@ import (
 const logtag = "aggregator"
 
 type Aggregator struct {
-	mu         sync.RWMutex
-	allMetrics map[string]interface{}
+	mu           sync.RWMutex
+	allMetrics   map[string]interface{}
+	enableDocker bool
 }
 
-func NewAggregator() *Aggregator {
+func NewAggregator(enableDocker bool) *Aggregator {
 	return &Aggregator{
-		allMetrics: make(map[string]interface{}),
+		allMetrics:   make(map[string]interface{}),
+		enableDocker: enableDocker,
 	}
 }
 
@@ -48,6 +50,11 @@ func (a *Aggregator) CollectAll() map[string]error {
 	if err := a.CollectHost(); err != nil {
 		errors["host"] = err
 	}
+	if a.enableDocker {
+		if err := a.CollectDocker(); err != nil {
+			errors["docker"] = err
+		}
+	}
 
 	if len(errors) > 0 {
 		return errors
@@ -71,7 +78,13 @@ func (a *Aggregator) CollectAllConcurrent() map[string]error {
 		{"network", a.CollectNetwork},
 		{"user", a.CollectUser},
 		{"host", a.CollectHost},
-		{"docker", a.CollectDocker},
+	}
+
+	if a.enableDocker {
+		collectors = append(collectors, struct {
+			name string
+			fn   func() error
+		}{"docker", a.CollectDocker})
 	}
 
 	for _, collector := range collectors {

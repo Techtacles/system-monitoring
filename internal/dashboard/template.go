@@ -366,6 +366,69 @@ var tmpl string = `
                 <canvas id="userProcChart"></canvas>
             </div>
         </div>
+
+        <div id="docker-section" style="display: none;">
+            <div class="section-header">Docker Overview</div>
+            <div class="grid">
+                <div class="card">
+                    <div class="card-header">
+                        <span class="card-title">Docker Info</span>
+                        <span id="docker-status" class="status-badge">Running</span>
+                    </div>
+                    <div class="info-row">
+                         <span class="info-label">Version</span>
+                         <span id="docker-version"></span>
+                    </div>
+                    <div class="info-row">
+                         <span class="info-label">Platform</span>
+                         <span id="docker-platform"></span>
+                    </div>
+                     <div class="info-row">
+                         <span class="info-label">Images</span>
+                         <span id="docker-images">0</span>
+                    </div>
+                     <div class="info-row">
+                         <span class="info-label">Volumes</span>
+                         <span id="docker-volumes">0</span>
+                    </div>
+                </div>
+                 <div class="card">
+                    <div class="card-header">
+                        <span class="card-title">Container Status</span>
+                    </div>
+                    <canvas id="dockerContainerChart"></canvas>
+                </div>
+                <div class="card">
+                    <div class="card-header">
+                        <span class="card-title">Docker Disk Usage</span>
+                    </div>
+                    <canvas id="dockerDiskChart"></canvas>
+                </div>
+            </div>
+             <div class="grid">
+                <div class="card" style="grid-column: span 3;">
+                    <div class="card-header">
+                        <span class="card-title">Running Containers</span>
+                    </div>
+                     <div class="table-container" style="max-height: 400px;">
+                        <table>
+                            <thead>
+                                <tr>
+                                    <th>Names</th>
+                                    <th>Image</th>
+                                    <th>State</th>
+                                    <th>Size</th>
+                                    <th>Ports</th>
+                                </tr>
+                            </thead>
+                            <tbody id="docker-container-body">
+                                <tr><td colspan="5">Loading...</td></tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
     </div>
 
     <script>
@@ -374,6 +437,7 @@ var tmpl string = `
         let topCpuChart, topMemChart, topThreadsChart;
         let netConnChart, userProcChart;
         let memVmsRssChart, memHeapStackChart;
+        let dockerContainerChart, dockerDiskChart;
 
         function initCharts() {
             const commonOptions = {
@@ -589,6 +653,38 @@ var tmpl string = `
                     }
                 }
             });
+
+            // Docker Container Status Chart
+            dockerContainerChart = new Chart(document.getElementById('dockerContainerChart').getContext('2d'), {
+                type: 'doughnut',
+                data: {
+                    labels: ['Running', 'Paused', 'Stopped'],
+                    datasets: [{
+                        data: [0, 0, 0],
+                        backgroundColor: ['#22c55e', '#f59e0b', '#ef4444'],
+                        borderWidth: 0
+                    }]
+                },
+                options: doughnutOptions
+            });
+
+            // Docker Disk Usage Chart
+             dockerDiskChart = new Chart(document.getElementById('dockerDiskChart').getContext('2d'), {
+                type: 'bar',
+                data: {
+                    labels: ['Containers', 'Images', 'Build Cache'],
+                    datasets: [{
+                        label: 'Size (GB)',
+                        data: [],
+                        backgroundColor: ['#38bdf8', '#a78bfa', '#fbbf24'],
+                        borderRadius: 4
+                    }]
+                },
+                 options: {
+                    ...commonOptions,
+                    plugins: { legend: { display: false } },
+                 }
+            });
         }
 
         function formatBytes(bytes) {
@@ -773,6 +869,50 @@ var tmpl string = `
                          });
                          document.getElementById('conn-table-body').innerHTML = connHtml || '<tr><td colspan="4">No visible established connections</td></tr>';
                      }
+                }
+
+                // Update Docker
+                const dockerSection = document.getElementById('docker-section');
+                if (data.docker) {
+                    dockerSection.style.display = 'block';
+                    const d = data.docker;
+
+                    document.getElementById('docker-version').textContent = 'v' + d.APIVersion;
+                    document.getElementById('docker-platform').textContent = d.OS + ' / ' + d.Arch;
+                    document.getElementById('docker-images').textContent = d.TotalImages;
+                    document.getElementById('docker-volumes').textContent = d.TotalVolumes;
+                    
+                    dockerContainerChart.data.datasets[0].data = [d.ContainersRunning, d.ContainersPaused, d.ContainersStopped];
+                    dockerContainerChart.update();
+
+                    dockerDiskChart.data.datasets[0].data = [
+                        (d.ContainersDiskUsage / 1024 / 1024 / 1024).toFixed(2),
+                        (d.ImagesDiskUsage / 1024 / 1024 / 1024).toFixed(2),
+                        (d.BuildCacheDiskUsage / 1024 / 1024 / 1024).toFixed(2)
+                    ];
+                    dockerDiskChart.update();
+
+                    if (d.ContainerStats) {
+                         let html = '';
+                         d.ContainerStats.forEach(c => {
+                             let ports = '';
+                             if (c.ContainerPorts) {
+                                 ports = c.ContainerPorts.map(p => (p.PublicPort ? p.PublicPort + ':' : '') + p.PrivatePort + '/' + p.Type).join(', ');
+                             }
+                             
+                             html += '<tr>' +
+                                    '<td>' + (c.ContainerNames ? c.ContainerNames.join(', ') : 'unknown') + '</td>' +
+                                    '<td>' + c.ImageName + '</td>' +
+                                    '<td><span class="badge" style="background:' + (c.ContainerState === 'running' ? '#059669' : '#b91c1c') + '">' + c.ContainerState + '</span></td>' +
+                                    '<td>' + formatBytes(c.ContainerRootSizeInBytes || 0) + '</td>' +
+                                    '<td>' + ports + '</td>' +
+                                '</tr>';
+                         });
+                         document.getElementById('docker-container-body').innerHTML = html;
+                    }
+
+                } else {
+                    dockerSection.style.display = 'none';
                 }
 
             } catch (err) {
