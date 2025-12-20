@@ -6,6 +6,7 @@ import (
 	"github.com/techtacles/sysmonitoring/internal/logging"
 	"github.com/techtacles/sysmonitoring/internal/metrics/cpu"
 	"github.com/techtacles/sysmonitoring/internal/metrics/disk"
+	"github.com/techtacles/sysmonitoring/internal/metrics/docker"
 	"github.com/techtacles/sysmonitoring/internal/metrics/host"
 	"github.com/techtacles/sysmonitoring/internal/metrics/memory"
 	"github.com/techtacles/sysmonitoring/internal/metrics/network"
@@ -70,6 +71,7 @@ func (a *Aggregator) CollectAllConcurrent() map[string]error {
 		{"network", a.CollectNetwork},
 		{"user", a.CollectUser},
 		{"host", a.CollectHost},
+		{"docker", a.CollectDocker},
 	}
 
 	for _, collector := range collectors {
@@ -191,6 +193,23 @@ func (a *Aggregator) CollectHost() error {
 	a.mu.Unlock()
 
 	logging.Info(logtag, "successfully collected host metrics")
+	return nil
+}
+
+func (a *Aggregator) CollectDocker() error {
+	logging.Info(logtag, "collecting docker metrics")
+
+	d := docker.DockerInfo{}
+	if err := d.Collect(); err != nil {
+		logging.Error(logtag, "error collecting docker metrics", err)
+		return err
+	}
+
+	a.mu.Lock()
+	a.allMetrics["docker"] = d
+	a.mu.Unlock()
+
+	logging.Info(logtag, "successfully collected docker metrics")
 	return nil
 }
 
