@@ -44,10 +44,10 @@ type Containers struct {
 
 // {09 Dec 2025 23:50:18 UTC 1  243876101}
 type Images struct {
+	ID                               string
 	ImageNames                       []string
 	CreatedDate                      string
 	NumberOfContainersUsingThisImage int64
-	ImageAnnotation                  string
 	ImageSize                        int64
 }
 
@@ -57,6 +57,7 @@ type Volumes struct {
 	Scope      string
 	Driver     string
 	VolumeSize int64
+	Created    string
 }
 
 func (d *DockerInfo) Collect() error {
@@ -149,8 +150,9 @@ func listAllImages() ([]Images, error) {
 	results := make([]Images, 0, len(image_list_result.Items))
 	for _, image := range image_list_result.Items {
 		results = append(results, Images{
+			ID:                               image.ID,
 			ImageNames:                       image.RepoTags,
-			CreatedDate:                      time.Unix(image.Created, 0).Format("02 Jan 2006 15:04:05 UTC"),
+			CreatedDate:                      time.Unix(image.Created, 0).Format(time.RFC822),
 			NumberOfContainersUsingThisImage: image.Containers,
 			ImageSize:                        image.Size,
 		})
@@ -177,13 +179,17 @@ func listAllVolumes() ([]Volumes, error) {
 	}
 	results := make([]Volumes, 0, len(volume_list_result.Items))
 	for _, i := range volume_list_result.Items {
-		results = append(results, Volumes{
+		vol := Volumes{
 			VolumeName: i.Name,
 			MountPoint: i.Mountpoint,
 			Scope:      i.Scope,
 			Driver:     i.Driver,
-			VolumeSize: i.UsageData.Size,
-		})
+			Created:    i.CreatedAt,
+		}
+		if i.UsageData != nil {
+			vol.VolumeSize = i.UsageData.Size
+		}
+		results = append(results, vol)
 	}
 	return results, nil
 

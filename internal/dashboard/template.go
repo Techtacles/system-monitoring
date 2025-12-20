@@ -391,6 +391,14 @@ var tmpl string = `
                          <span class="info-label">Volumes</span>
                          <span id="docker-volumes">0</span>
                     </div>
+                      <div class="info-row" id="docker-ncpu-row" style="border-top: 1px solid var(--border-color); margin-top: 10px; padding-top: 10px;">
+                          <span class="info-label">NCPU</span>
+                          <span id="docker-ncpu">0</span>
+                     </div>
+                      <div class="info-row" id="docker-mem-row">
+                          <span class="info-label">Memory Total</span>
+                          <span id="docker-mem-total">0 GB</span>
+                     </div>
                 </div>
                  <div class="card">
                     <div class="card-header">
@@ -410,7 +418,7 @@ var tmpl string = `
                     <div class="card-header">
                         <span class="card-title">Running Containers</span>
                     </div>
-                     <div class="table-container" style="max-height: 400px;">
+                     <div class="table-container" style="max-height: 300px;">
                         <table>
                             <thead>
                                 <tr>
@@ -422,6 +430,54 @@ var tmpl string = `
                                 </tr>
                             </thead>
                             <tbody id="docker-container-body">
+                                <tr><td colspan="5">Loading...</td></tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+
+            <div class="grid">
+                <div class="card" style="grid-column: span 3;">
+                    <div class="card-header">
+                        <span class="card-title">Docker Images</span>
+                    </div>
+                     <div class="table-container" style="max-height: 300px;">
+                        <table>
+                            <thead>
+                                <tr>
+                                    <th>Names</th>
+                                    <th>ID</th>
+                                    <th>Size</th>
+                                    <th>Created</th>
+                                    <th>Containers</th>
+                                </tr>
+                            </thead>
+                            <tbody id="docker-images-body">
+                                <tr><td colspan="5">Loading...</td></tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+
+            <div class="grid">
+                <div class="card" style="grid-column: span 3;">
+                    <div class="card-header">
+                        <span class="card-title">Docker Volumes</span>
+                    </div>
+                     <div class="table-container" style="max-height: 300px;">
+                        <table>
+                            <thead>
+                                <tr>
+                                    <th>Name</th>
+                                    <th>Driver</th>
+                                    <th>Scope</th>
+                                    <th>Mountpoint</th>
+                                    <th>Size</th>
+                                </tr>
+                            </thead>
+                            <tbody id="docker-volumes-body">
                                 <tr><td colspan="5">Loading...</td></tr>
                             </tbody>
                         </table>
@@ -881,6 +937,8 @@ var tmpl string = `
                     document.getElementById('docker-platform').textContent = d.OS + ' / ' + d.Arch;
                     document.getElementById('docker-images').textContent = d.TotalImages;
                     document.getElementById('docker-volumes').textContent = d.TotalVolumes;
+                    document.getElementById('docker-ncpu').textContent = d.NCpu || '0';
+                    document.getElementById('docker-mem-total').textContent = d.MemTotal ? (d.MemTotal / 1024 / 1024 / 1024).toFixed(2) + ' GB' : '0 GB';
                     
                     dockerContainerChart.data.datasets[0].data = [d.ContainersRunning, d.ContainersPaused, d.ContainersStopped];
                     dockerContainerChart.update();
@@ -909,6 +967,34 @@ var tmpl string = `
                                 '</tr>';
                          });
                          document.getElementById('docker-container-body').innerHTML = html;
+                    }
+
+                    if (d.ImageStats) {
+                        let html = '';
+                        d.ImageStats.forEach(img => {
+                            html += '<tr>' +
+                                '<td>' + (img.ImageNames ? img.ImageNames.join('<br>') : 'unnamed') + '</td>' +
+                                '<td title="' + img.ID + '"><code>' + img.ID.substring(7, 19) + '</code></td>' +
+                                '<td>' + formatBytes(img.ImageSize || 0) + '</td>' +
+                                '<td>' + img.CreatedDate + '</td>' +
+                                '<td>' + img.NumberOfContainersUsingThisImage + '</td>' +
+                                '</tr>';
+                        });
+                        document.getElementById('docker-images-body').innerHTML = html || '<tr><td colspan="5">No images found</td></tr>';
+                    }
+
+                    if (d.VolumeStats) {
+                        let html = '';
+                        d.VolumeStats.forEach(vol => {
+                            html += '<tr>' +
+                                '<td>' + vol.VolumeName + '</td>' +
+                                '<td>' + vol.Driver + '</td>' +
+                                '<td>' + vol.Scope + '</td>' +
+                                '<td style="font-size: 0.8em; word-break: break-all;">' + vol.MountPoint + '</td>' +
+                                '<td>' + formatBytes(vol.VolumeSize || 0) + '</td>' +
+                                '</tr>';
+                        });
+                        document.getElementById('docker-volumes-body').innerHTML = html || '<tr><td colspan="5">No volumes found</td></tr>';
                     }
 
                 } else {
