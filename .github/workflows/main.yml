@@ -1,4 +1,4 @@
-name: Export go builds across multiple OS
+name: Export go builds across multiple Operating Systems
 on:
  push:
    branches: [ "master" ]
