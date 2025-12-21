@@ -507,6 +507,21 @@ async function updateData() {
                 document.getElementById('docker-volumes-body').innerHTML = html || '<tr><td colspan="5">No volumes found</td></tr>';
             }
 
+            if (d.ContainerCpuMemoryCollection) {
+                let html = '';
+                for (const [id, stats] of Object.entries(d.ContainerCpuMemoryCollection)) {
+                    html += '<tr>' +
+                        '<td>' + (stats.Name || id.substring(0, 12)) + '</td>' +
+                        '<td class="text-right">' + (stats.CPUPercentage || 0).toFixed(2) + '%</td>' +
+                        '<td class="text-right">' + (stats.CPUTime || 0).toLocaleString() + '</td>' +
+                        '<td class="text-right">' + formatBytes(stats.Memory || 0) + '</td>' +
+                        '<td class="text-right">' + formatBytes(stats.ReadSize || 0) + '</td>' +
+                        '<td class="text-right">' + formatBytes(stats.WriteSize || 0) + '</td>' +
+                        '</tr>';
+                }
+                document.getElementById('docker-utilization-body').innerHTML = html || '<tr><td colspan="5">No utilization data available</td></tr>';
+            }
+
         } else {
             dockerSection.style.display = 'none';
         }

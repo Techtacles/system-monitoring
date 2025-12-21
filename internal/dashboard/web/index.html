@@ -1,5 +1,6 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -9,6 +10,7 @@
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="/web/css/style.css">
 </head>
+
 <body>
     <div class="container">
         <header>
@@ -24,7 +26,8 @@
             <div class="card">
                 <div class="card-header">
                     <span class="card-title">System Info</span>
-                    <span id="uptime-badge" class="status-badge" style="background: #eab308; display: none;">Uptime: 0h</span>
+                    <span id="uptime-badge" class="status-badge" style="background: #eab308; display: none;">Uptime:
+                        0h</span>
                 </div>
                 <div id="system-info">Loading...</div>
                 <div id="host-info"></div>
@@ -82,20 +85,20 @@
                 <canvas id="diskChart"></canvas>
             </div>
         </div>
-        
+
         <div class="section-header">Network Deep Dive</div>
         <div class="grid">
             <div class="card">
-                 <div class="card-header">
+                <div class="card-header">
                     <span class="card-title">Total Connections</span>
                     <span id="total-conn-count" class="stat-value">0</span>
                 </div>
-                 <div class="card-header">
+                <div class="card-header">
                     <span class="card-title">Connection States</span>
                 </div>
                 <canvas id="netConnChart"></canvas>
             </div>
-             <div class="card" style="grid-column: span 2;">
+            <div class="card" style="grid-column: span 2;">
                 <div class="card-header">
                     <span class="card-title">Network Interface Details</span>
                 </div>
@@ -113,18 +116,20 @@
                             </tr>
                         </thead>
                         <tbody id="io-table-body">
-                            <tr><td colspan="7">Loading...</td></tr>
+                            <tr>
+                                <td colspan="7">Loading...</td>
+                            </tr>
                         </tbody>
                     </table>
                 </div>
             </div>
         </div>
         <div class="grid">
-             <div class="card" style="grid-column: span 3;">
+            <div class="card" style="grid-column: span 3;">
                 <div class="card-header">
                     <span class="card-title">Established Connections</span>
                 </div>
-                 <div class="table-container" style="max-height: 300px;">
+                <div class="table-container" style="max-height: 300px;">
                     <table>
                         <thead>
                             <tr>
@@ -135,7 +140,9 @@
                             </tr>
                         </thead>
                         <tbody id="conn-table-body">
-                            <tr><td colspan="4">Loading...</td></tr>
+                            <tr>
+                                <td colspan="4">Loading...</td>
+                            </tr>
                         </tbody>
                     </table>
                 </div>
@@ -172,13 +179,13 @@
                 </div>
                 <canvas id="topMemChart"></canvas>
             </div>
-             <div class="card">
+            <div class="card">
                 <div class="card-header">
                     <span class="card-title">Top 5 Processes (Threads)</span>
                 </div>
                 <canvas id="topThreadsChart"></canvas>
             </div>
-             <div class="card">
+            <div class="card">
                 <div class="card-header">
                     <span class="card-title">Processes by User</span>
                 </div>
@@ -195,31 +202,32 @@
                         <span id="docker-status" class="status-badge">Running</span>
                     </div>
                     <div class="info-row">
-                         <span class="info-label">Version</span>
-                         <span id="docker-version"></span>
+                        <span class="info-label">Version</span>
+                        <span id="docker-version"></span>
                     </div>
                     <div class="info-row">
-                         <span class="info-label">Platform</span>
-                         <span id="docker-platform"></span>
+                        <span class="info-label">Platform</span>
+                        <span id="docker-platform"></span>
                     </div>
-                     <div class="info-row">
-                         <span class="info-label">Images</span>
-                         <span id="docker-images">0</span>
+                    <div class="info-row">
+                        <span class="info-label">Images</span>
+                        <span id="docker-images">0</span>
                     </div>
-                     <div class="info-row">
-                         <span class="info-label">Volumes</span>
-                         <span id="docker-volumes">0</span>
+                    <div class="info-row">
+                        <span class="info-label">Volumes</span>
+                        <span id="docker-volumes">0</span>
                     </div>
-                      <div class="info-row" id="docker-ncpu-row" style="border-top: 1px solid var(--border-color); margin-top: 10px; padding-top: 10px;">
-                          <span class="info-label">NCPU</span>
-                          <span id="docker-ncpu">0</span>
-                     </div>
-                      <div class="info-row" id="docker-mem-row">
-                          <span class="info-label">Memory Total</span>
-                          <span id="docker-mem-total">0 GB</span>
-                     </div>
+                    <div class="info-row" id="docker-ncpu-row"
+                        style="border-top: 1px solid var(--border-color); margin-top: 10px; padding-top: 10px;">
+                        <span class="info-label">NCPU</span>
+                        <span id="docker-ncpu">0</span>
+                    </div>
+                    <div class="info-row" id="docker-mem-row">
+                        <span class="info-label">Memory Total</span>
+                        <span id="docker-mem-total">0 GB</span>
+                    </div>
                 </div>
-                 <div class="card">
+                <div class="card">
                     <div class="card-header">
                         <span class="card-title">Container Status</span>
                     </div>
@@ -232,12 +240,12 @@
                     <canvas id="dockerDiskChart"></canvas>
                 </div>
             </div>
-             <div class="grid">
+            <div class="grid">
                 <div class="card" style="grid-column: span 3;">
                     <div class="card-header">
                         <span class="card-title">Running Containers</span>
                     </div>
-                     <div class="table-container" style="max-height: 300px;">
+                    <div class="table-container" style="max-height: 300px;">
                         <table>
                             <thead>
                                 <tr>
@@ -249,7 +257,9 @@
                                 </tr>
                             </thead>
                             <tbody id="docker-container-body">
-                                <tr><td colspan="5">Loading...</td></tr>
+                                <tr>
+                                    <td colspan="5">Loading...</td>
+                                </tr>
                             </tbody>
                         </table>
                     </div>
@@ -259,9 +269,37 @@
             <div class="grid">
                 <div class="card" style="grid-column: span 3;">
                     <div class="card-header">
+                        <span class="card-title">Container Resource Utilization</span>
+                    </div>
+                    <div class="table-container" style="max-height: 300px;">
+                        <table>
+                            <thead>
+                                <tr>
+                                    <th>Container Name</th>
+                                    <th class="text-right">CPU %</th>
+                                    <th class="text-right">CPU Time (ns)</th>
+                                    <th class="text-right">Memory Usage</th>
+                                    <th class="text-right">Disk Read</th>
+                                    <th class="text-right">Disk Write</th>
+                                </tr>
+                            </thead>
+                            <tbody id="docker-utilization-body">
+                                <tr>
+                                    <td colspan="5">Loading...</td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+
+
+            <div class="grid">
+                <div class="card" style="grid-column: span 3;">
+                    <div class="card-header">
                         <span class="card-title">Docker Images</span>
                     </div>
-                     <div class="table-container" style="max-height: 300px;">
+                    <div class="table-container" style="max-height: 300px;">
                         <table>
                             <thead>
                                 <tr>
@@ -273,7 +311,9 @@
                                 </tr>
                             </thead>
                             <tbody id="docker-images-body">
-                                <tr><td colspan="5">Loading...</td></tr>
+                                <tr>
+                                    <td colspan="5">Loading...</td>
+                                </tr>
                             </tbody>
                         </table>
                     </div>
@@ -285,7 +325,7 @@
                     <div class="card-header">
                         <span class="card-title">Docker Volumes</span>
                     </div>
-                     <div class="table-container" style="max-height: 300px;">
+                    <div class="table-container" style="max-height: 300px;">
                         <table>
                             <thead>
                                 <tr>
@@ -297,7 +337,9 @@
                                 </tr>
                             </thead>
                             <tbody id="docker-volumes-body">
-                                <tr><td colspan="5">Loading...</td></tr>
+                                <tr>
+                                    <td colspan="5">Loading...</td>
+                                </tr>
                             </tbody>
                         </table>
                     </div>
@@ -308,4 +350,5 @@
 
     <script src="/web/js/script.js"></script>
 </body>
+
 </html>

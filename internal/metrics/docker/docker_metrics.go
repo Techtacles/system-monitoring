@@ -2,6 +2,7 @@ package docker
 
 import (
 	"context"
+	"encoding/json"
 	"time"
 
 	"github.com/moby/moby/api/types/container"
@@ -11,35 +12,49 @@ import (
 
 const logtag = "docker"
 
+var prevCPUStats = make(map[string]container.StatsResponse)
+
 type DockerInfo struct {
-	DockerEnv           string // eg docker-desktop
-	ContainersRunning   int
-	ContainersPaused    int
-	ContainersStopped   int
-	NCpu                int
-	MemTotal            int64
-	ContainersDiskUsage int64
-	ImagesDiskUsage     int64
-	BuildCacheDiskUsage int64
-	PlatformName        string
-	APIVersion          string
-	OS                  string
-	Arch                string
-	TotalImages         int
-	TotalContainers     int
-	TotalVolumes        int
-	ContainerStats      []Containers
-	ImageStats          []Images
-	VolumeStats         []Volumes
+	DockerEnv                    string // eg docker-desktop
+	ContainersRunning            int
+	ContainersPaused             int
+	ContainersStopped            int
+	NCpu                         int
+	MemTotal                     int64
+	ContainersDiskUsage          int64
+	ImagesDiskUsage              int64
+	BuildCacheDiskUsage          int64
+	PlatformName                 string
+	APIVersion                   string
+	OS                           string
+	Arch                         string
+	TotalImages                  int
+	TotalContainers              int
+	TotalVolumes                 int
+	ContainerCpuMemoryCollection map[string]ContainerMetrics
+	ContainerStats               []Containers
+	ImageStats                   []Images
+	VolumeStats                  []Volumes
 }
 
 // example output: {nginx [/sleepy_chaum] [{invalid IP 80 0 tcp}] running 0}
 type Containers struct {
+	ID                       string
 	ImageName                string
 	ContainerNames           []string
 	ContainerPorts           []container.PortSummary
 	ContainerState           container.ContainerState
 	ContainerRootSizeInBytes int64
+}
+
+// example: all map[51ac:map[cpu:0 disk:[] memory:0 name:/elastic_mirzakhani read_size_in_bytes:0 write_size_in_bytes:0] 8b9:map[cpu:0 disk:[] memory:0 name:/sleepy_chaum read_size_in_bytes:0 write_size_in_bytes:0]]
+type ContainerMetrics struct {
+	CPUTime       uint64
+	CPUPercentage float64
+	Memory        uint64
+	Name          string
+	ReadSize      uint64
+	WriteSize     uint64
 }
 
 // {09 Dec 2025 23:50:18 UTC 1  243876101}
@@ -80,6 +95,13 @@ func (d *DockerInfo) Collect() error {
 	if err != nil {
 		return err
 	}
+
+	container_collection, err := getContainerCollectionMetrics()
+	if err != nil {
+		return err
+	}
+	d.ContainerCpuMemoryCollection = container_collection
+
 	d.VolumeStats = volume_stats
 	d.TotalContainers = len(d.ContainerStats)
 	d.TotalImages = len(d.ImageStats)
@@ -120,6 +142,7 @@ func listAllContainers() ([]Containers, error) {
 	for _, item := range result.Items {
 
 		list_of_containers = append(list_of_containers, Containers{
+			ID:                       item.ID,
 			ImageName:                item.Image,
 			ContainerNames:           item.Names,
 			ContainerPorts:           item.Ports,
@@ -136,6 +159,7 @@ func listAllImages() ([]Images, error) {
 	defer cancel()
 
 	api_client, err := getClient()
+	defer api_client.Close()
 
 	if err != nil {
 		logging.Error(logtag, "failed to create docker client", err)
@@ -161,11 +185,102 @@ func listAllImages() ([]Images, error) {
 
 }
 
+func calculateCPUPercent(
+	id string,
+	curr container.StatsResponse,
+) float64 {
+
+	prev, ok := prevCPUStats[id]
+	if !ok {
+		prevCPUStats[id] = curr
+		return 0.0 // first sample
+	}
+
+	cpuDelta := float64(
+		curr.CPUStats.CPUUsage.TotalUsage -
+			prev.CPUStats.CPUUsage.TotalUsage,
+	)
+
+	systemDelta := float64(
+		curr.CPUStats.SystemUsage -
+			prev.CPUStats.SystemUsage,
+	)
+
+	onlineCPUs := float64(curr.CPUStats.OnlineCPUs)
+	if onlineCPUs == 0 {
+		onlineCPUs = float64(len(curr.CPUStats.CPUUsage.PercpuUsage))
+	}
+
+	prevCPUStats[id] = curr
+
+	if systemDelta > 0 && cpuDelta > 0 {
+		return (cpuDelta / systemDelta) * onlineCPUs * 100.0
+	}
+
+	return 0.0
+}
+
+func getContainerCollectionMetrics() (map[string]ContainerMetrics, error) {
+	ctx, cancel := getContext()
+	defer cancel()
+
+	api_client, err := getClient()
+	defer api_client.Close()
+
+	if err != nil {
+		logging.Error(logtag, "failed to create docker client", err)
+		return nil, err
+	}
+	all_containers, err := listAllContainers()
+	if err != nil {
+		return nil, err
+	}
+
+	container_collection_metrics := make(map[string]ContainerMetrics, len(all_containers))
+	all_container_ids := make([]string, 0, len(all_containers))
+
+	for _, container := range all_containers {
+		all_container_ids = append(all_container_ids, container.ID)
+	}
+
+	for _, id := range all_container_ids {
+		container_stats_result, err := api_client.ContainerStats(ctx, id, client.ContainerStatsOptions{})
+		if err != nil {
+			logging.Error(logtag, "failed to get container stats", err)
+			return nil, err
+		}
+		var stats container.StatsResponse
+		err = json.NewDecoder(container_stats_result.Body).Decode(&stats)
+
+		if err != nil {
+			logging.Error(logtag, "failed to decode container stats", err)
+			return nil, err
+		}
+		defer container_stats_result.Body.Close()
+		cpuPercent := calculateCPUPercent(id, stats)
+
+		// define the container metrics nested dict
+		container_collection_metrics[id] = ContainerMetrics{
+			CPUTime:       stats.CPUStats.CPUUsage.TotalUsage,
+			CPUPercentage: cpuPercent,
+			Memory:        stats.MemoryStats.Usage,
+			Name:          stats.Name,
+			ReadSize:      stats.StorageStats.ReadSizeBytes,
+			WriteSize:     stats.StorageStats.WriteSizeBytes,
+		}
+
+	}
+
+	return container_collection_metrics, nil
+
+}
+
 func listAllVolumes() ([]Volumes, error) {
 	ctx, cancel := getContext()
 	defer cancel()
 
 	api_client, err := getClient()
+	defer api_client.Close()
 
 	if err != nil {
 		logging.Error(logtag, "failed to create docker client", err)
@@ -200,6 +315,7 @@ func (d *DockerInfo) getContainerDiskUsage() error {
 	defer cancel()
 
 	api_client, err := getClient()
+	defer api_client.Close()
 
 	if err != nil {
 		logging.Error(logtag, "failed to create docker client", err)
@@ -229,6 +345,7 @@ func (d *DockerInfo) getSystemInfo() error {
 	defer cancel()
 
 	api_client, err := getClient()
+	defer api_client.Close()
 
 	if err != nil {
 		logging.Error(logtag, "failed to create docker client", err)
@@ -255,6 +372,7 @@ func (d *DockerInfo) getPlatformInfo() error {
 	defer cancel()
 
 	api_client, err := getClient()
+	defer api_client.Close()
 
 	if err != nil {
 		logging.Error(logtag, "failed to create docker client", err)
