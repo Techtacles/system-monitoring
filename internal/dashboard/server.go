@@ -41,6 +41,9 @@ func Run(enableDocker bool) error {
 	// Serve static images
 	http.Handle("/images/", http.FileServer(http.FS(imagesDir)))
 
+	// Serve static web assets (CSS, JS)
+	http.Handle("/web/", http.FileServer(http.FS(WebAssets)))
+
 	// API Endpoint for raw metrics
 	http.HandleFunc("/api/metrics", func(w http.ResponseWriter, r *http.Request) {
 		w.Header().Set("Content-Type", "application/json")
@@ -53,7 +56,7 @@ func Run(enableDocker bool) error {
 
 	// Dashboard UI
 	http.HandleFunc("/", func(w http.ResponseWriter, r *http.Request) {
-		t, err := template.New("dashboard").Parse(tmpl)
+		t, err := template.ParseFS(WebAssets, "web/index.html")
 		if err != nil {
 			http.Error(w, "Internal Server Error", http.StatusInternalServerError)
 			logging.Error(logtag, "error parsing template", err)

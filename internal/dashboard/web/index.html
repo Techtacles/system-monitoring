@@ -1,0 +1,311 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>System Monitor</title>
+    <link rel="icon" type="image/png" href="/images/logo.png">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="/web/css/style.css">
+</head>
+<body>
+    <div class="container">
+        <header>
+            <div class="logo-container">
+                <img src="/images/logo.png" alt="System Monitor Logo" class="logo">
+                <h1>System Monitor</h1>
+            </div>
+            <div id="connection-status" class="status-badge">Live</div>
+        </header>
+
+        <div class="section-header">Overview</div>
+        <div class="grid">
+            <div class="card">
+                <div class="card-header">
+                    <span class="card-title">System Info</span>
+                    <span id="uptime-badge" class="status-badge" style="background: #eab308; display: none;">Uptime: 0h</span>
+                </div>
+                <div id="system-info">Loading...</div>
+                <div id="host-info"></div>
+            </div>
+            <div class="card">
+                <div class="card-header">
+                    <span class="card-title">CPU Load</span>
+                    <span id="cpu-total" class="stat-value">0%</span>
+                </div>
+                <div class="info-row">
+                    <span class="info-label">Load Avg (1m | 5m | 15m)</span>
+                    <span id="load-avg" style="font-weight: 600;">0.00 | 0.00 | 0.00</span>
+                </div>
+                <div class="info-row">
+                    <span class="info-label">Physical Cores</span>
+                    <span id="cpu-physical">0</span>
+                </div>
+                <div class="info-row">
+                    <span class="info-label">Logical Cores</span>
+                    <span id="cpu-logical">0</span>
+                </div>
+                <div class="info-row">
+                    <span class="info-label">Processes</span>
+                    <span id="proc-count">0</span>
+                </div>
+            </div>
+            <div class="card">
+                <div class="card-header">
+                    <span class="card-title">Memory Usage</span>
+                    <span id="mem-total-percent" class="stat-value">0%</span>
+                </div>
+                <canvas id="memoryChart"></canvas>
+            </div>
+            <div class="card">
+                <div class="card-header">
+                    <span class="card-title">Swap Memory</span>
+                    <span id="swap-total-percent" class="stat-value">0%</span>
+                </div>
+                <canvas id="swapChart"></canvas>
+            </div>
+        </div>
+
+        <div class="section-header">Hardware Metrics</div>
+        <div class="grid">
+            <div class="card" style="grid-column: span 2;">
+                <div class="card-header">
+                    <span class="card-title">CPU Usage Per Core</span>
+                </div>
+                <canvas id="cpuCoreChart"></canvas>
+            </div>
+            <div class="card" style="grid-column: span 1;">
+                <div class="card-header">
+                    <span class="card-title">Disk Usage</span>
+                </div>
+                <canvas id="diskChart"></canvas>
+            </div>
+        </div>
+        
+        <div class="section-header">Network Deep Dive</div>
+        <div class="grid">
+            <div class="card">
+                 <div class="card-header">
+                    <span class="card-title">Total Connections</span>
+                    <span id="total-conn-count" class="stat-value">0</span>
+                </div>
+                 <div class="card-header">
+                    <span class="card-title">Connection States</span>
+                </div>
+                <canvas id="netConnChart"></canvas>
+            </div>
+             <div class="card" style="grid-column: span 2;">
+                <div class="card-header">
+                    <span class="card-title">Network Interface Details</span>
+                </div>
+                <div class="table-container">
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>Interface</th>
+                                <th class="text-right">Bytes Sent</th>
+                                <th class="text-right">Bytes Recv</th>
+                                <th class="text-right">Sent Pkts</th>
+                                <th class="text-right">Recv Pkts</th>
+                                <th class="text-right">Errors In</th>
+                                <th class="text-right">Drops In</th>
+                            </tr>
+                        </thead>
+                        <tbody id="io-table-body">
+                            <tr><td colspan="7">Loading...</td></tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+        <div class="grid">
+             <div class="card" style="grid-column: span 3;">
+                <div class="card-header">
+                    <span class="card-title">Established Connections</span>
+                </div>
+                 <div class="table-container" style="max-height: 300px;">
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>Local Address</th>
+                                <th>Remote Address</th>
+                                <th>PID</th>
+                                <th>Status</th>
+                            </tr>
+                        </thead>
+                        <tbody id="conn-table-body">
+                            <tr><td colspan="4">Loading...</td></tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+
+        <div class="section-header">Memory Deep Dive</div>
+        <div class="grid">
+            <div class="card">
+                <div class="card-header">
+                    <span class="card-title">Virtual vs Physical (Top Procs)</span>
+                </div>
+                <canvas id="memVmsRssChart"></canvas>
+            </div>
+            <div class="card">
+                <div class="card-header">
+                    <span class="card-title">Heap vs Stack (Top Procs)</span>
+                </div>
+                <canvas id="memHeapStackChart"></canvas>
+            </div>
+        </div>
+
+        <div class="section-header">Top Processes</div>
+        <div class="grid">
+            <div class="card">
+                <div class="card-header">
+                    <span class="card-title">Top 5 Processes (CPU)</span>
+                </div>
+                <canvas id="topCpuChart"></canvas>
+            </div>
+            <div class="card">
+                <div class="card-header">
+                    <span class="card-title">Top 5 Processes (Memory)</span>
+                </div>
+                <canvas id="topMemChart"></canvas>
+            </div>
+             <div class="card">
+                <div class="card-header">
+                    <span class="card-title">Top 5 Processes (Threads)</span>
+                </div>
+                <canvas id="topThreadsChart"></canvas>
+            </div>
+             <div class="card">
+                <div class="card-header">
+                    <span class="card-title">Processes by User</span>
+                </div>
+                <canvas id="userProcChart"></canvas>
+            </div>
+        </div>
+
+        <div id="docker-section" style="display: none;">
+            <div class="section-header">Docker Overview</div>
+            <div class="grid">
+                <div class="card">
+                    <div class="card-header">
+                        <span class="card-title">Docker Info</span>
+                        <span id="docker-status" class="status-badge">Running</span>
+                    </div>
+                    <div class="info-row">
+                         <span class="info-label">Version</span>
+                         <span id="docker-version"></span>
+                    </div>
+                    <div class="info-row">
+                         <span class="info-label">Platform</span>
+                         <span id="docker-platform"></span>
+                    </div>
+                     <div class="info-row">
+                         <span class="info-label">Images</span>
+                         <span id="docker-images">0</span>
+                    </div>
+                     <div class="info-row">
+                         <span class="info-label">Volumes</span>
+                         <span id="docker-volumes">0</span>
+                    </div>
+                      <div class="info-row" id="docker-ncpu-row" style="border-top: 1px solid var(--border-color); margin-top: 10px; padding-top: 10px;">
+                          <span class="info-label">NCPU</span>
+                          <span id="docker-ncpu">0</span>
+                     </div>
+                      <div class="info-row" id="docker-mem-row">
+                          <span class="info-label">Memory Total</span>
+                          <span id="docker-mem-total">0 GB</span>
+                     </div>
+                </div>
+                 <div class="card">
+                    <div class="card-header">
+                        <span class="card-title">Container Status</span>
+                    </div>
+                    <canvas id="dockerContainerChart"></canvas>
+                </div>
+                <div class="card">
+                    <div class="card-header">
+                        <span class="card-title">Docker Disk Usage</span>
+                    </div>
+                    <canvas id="dockerDiskChart"></canvas>
+                </div>
+            </div>
+             <div class="grid">
+                <div class="card" style="grid-column: span 3;">
+                    <div class="card-header">
+                        <span class="card-title">Running Containers</span>
+                    </div>
+                     <div class="table-container" style="max-height: 300px;">
+                        <table>
+                            <thead>
+                                <tr>
+                                    <th>Names</th>
+                                    <th>Image</th>
+                                    <th>State</th>
+                                    <th>Size</th>
+                                    <th>Ports</th>
+                                </tr>
+                            </thead>
+                            <tbody id="docker-container-body">
+                                <tr><td colspan="5">Loading...</td></tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+
+            <div class="grid">
+                <div class="card" style="grid-column: span 3;">
+                    <div class="card-header">
+                        <span class="card-title">Docker Images</span>
+                    </div>
+                     <div class="table-container" style="max-height: 300px;">
+                        <table>
+                            <thead>
+                                <tr>
+                                    <th>Names</th>
+                                    <th>ID</th>
+                                    <th>Size</th>
+                                    <th>Created</th>
+                                    <th>Containers</th>
+                                </tr>
+                            </thead>
+                            <tbody id="docker-images-body">
+                                <tr><td colspan="5">Loading...</td></tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+
+            <div class="grid">
+                <div class="card" style="grid-column: span 3;">
+                    <div class="card-header">
+                        <span class="card-title">Docker Volumes</span>
+                    </div>
+                     <div class="table-container" style="max-height: 300px;">
+                        <table>
+                            <thead>
+                                <tr>
+                                    <th>Name</th>
+                                    <th>Driver</th>
+                                    <th>Scope</th>
+                                    <th>Mountpoint</th>
+                                    <th>Size</th>
+                                </tr>
+                            </thead>
+                            <tbody id="docker-volumes-body">
+                                <tr><td colspan="5">Loading...</td></tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="/web/js/script.js"></script>
+</body>
+</html>
