@@ -12,5 +12,6 @@ Please use the following naming conventions for your branches:
 
 - **New Features**: `feature/add-my-cool-feature`
 - **Bug Fixes**: `bug/fix-this-issue`
+- **Code Enhancements**: `enhancement/optimize-docker.go`
 
 That's it! Feel free to open a Pull Request, raise an issue, start a discussion, or suggest changes. Happy coding!
