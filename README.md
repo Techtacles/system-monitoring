@@ -139,13 +139,13 @@ OR
 
 #RUNNING THE BINARY for Windows
 #Run with default 8080 port
-sysmon-windows.exe start
+sysmon-windows start
 #Start with docker telemetry: make sure docker is running first
-sysmon-windows.exe start -d 
+sysmon-windows start -d 
 #start with custom port
-sysmon-windows.exe start -p 5000
+sysmon-windows start -p 5000
 # Start and add docker metrics to the dashboard and run on a specific port
-sysmon-windows.exe start -d -p 5000 
+sysmon-windows start -d -p 5000 
 
 
 #RUNNING THE BINARY for MacOS
