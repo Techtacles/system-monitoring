@@ -487,7 +487,7 @@ async function updateData() {
                         '<td title="' + img.ID + '"><code>' + img.ID.substring(7, 19) + '</code></td>' +
                         '<td>' + formatBytes(img.ImageSize || 0) + '</td>' +
                         '<td>' + img.CreatedDate + '</td>' +
-                        '<td>' + img.NumberOfContainersUsingThisImage + '</td>' +
+                        '<td>' + (img.NumberOfContainersUsingThisImage === -1 ? 'unknown' : img.NumberOfContainersUsingThisImage) + '</td>' +
                         '</tr>';
                 });
                 document.getElementById('docker-images-body').innerHTML = html || '<tr><td colspan="5">No images found</td></tr>';

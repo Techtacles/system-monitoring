@@ -37,7 +37,6 @@ type DockerInfo struct {
 	VolumeStats                  []Volumes
 }
 
-// example output: {nginx [/sleepy_chaum] [{invalid IP 80 0 tcp}] running 0}
 type Containers struct {
 	ID                       string
 	ImageName                string
@@ -47,7 +46,6 @@ type Containers struct {
 	ContainerRootSizeInBytes int64
 }
 
-// example: all map[51ac:map[cpu:0 disk:[] memory:0 name:/elastic_mirzakhani read_size_in_bytes:0 write_size_in_bytes:0] 8b9:map[cpu:0 disk:[] memory:0 name:/sleepy_chaum read_size_in_bytes:0 write_size_in_bytes:0]]
 type ContainerMetrics struct {
 	CPUTime       uint64
 	CPUPercentage float64
@@ -57,7 +55,6 @@ type ContainerMetrics struct {
 	WriteSize     uint64
 }
 
-// {09 Dec 2025 23:50:18 UTC 1  243876101}
 type Images struct {
 	ID                               string
 	ImageNames                       []string
