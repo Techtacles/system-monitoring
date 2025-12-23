@@ -200,7 +200,7 @@ go run main.go get_metrics all -a -r 5
 ![CLI Usage](examples/cli_usage.png)
 *Formatted CLI output for CPU metrics*
 
-You can get more details in the how to use section of the README.md link: [How to use](HOW TO USE.md)
+You can get more details in the how to use section of the README.md link: [How to use](https://github.com/Techtacles/system-monitoring/blob/master/HOW%20TO%20USE.md)
 
 ## Future enhancements
 

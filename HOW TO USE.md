@@ -68,7 +68,7 @@ chmod +x sysmon-linux
 
 #### Windows
 ```powershell
-.\sysmon-windows.exe start
+.\sysmon-windows start
 ```
 
 ---
@@ -111,6 +111,46 @@ go run main.go get_metrics all -a -r 10
 You can combine specific metrics and flags. For example, to monitor CPU, memory, and docker metrics every 5 seconds:
 ```bash
 go run main.go get_metrics cpu memory docker -d -a -r 5
+```
+
+### 5. Running from release
+Download the release for your OS from [GitHub Releases](https://github.com/Techtacles/system-monitoring/releases).
+
+#### MacOS
+```bash
+./sysmon-darwin get_metrics cpu
+./sysmon-darwin get_metrics memory
+./sysmon-darwin get_metrics disk
+./sysmon-darwin get_metrics network
+./sysmon-darwin get_metrics docker
+./sysmon-darwin get_metrics host
+./sysmon-darwin get_metrics user
+./sysmon-darwin get_metrics all
+./sysmon-darwin get_metrics cpu memory disk -a -r 5
+```
+
+#### Linux
+```bash
+./sysmon-linux get_metrics memory
+./sysmon-linux get_metrics disk
+./sysmon-linux get_metrics network
+./sysmon-linux get_metrics docker
+./sysmon-linux get_metrics host
+./sysmon-linux get_metrics user
+./sysmon-linux get_metrics all
+./sysmon-linux get_metrics cpu memory disk -a -r 5
+```
+
+#### Windows
+```powershell
+.\sysmon-windows get_metrics disk
+.\sysmon-windows get_metrics memory
+.\sysmon-windows get_metrics network
+.\sysmon-windows get_metrics docker
+.\sysmon-windows get_metrics host
+.\sysmon-windows get_metrics user
+.\sysmon-windows get_metrics all
+.\sysmon-windows get_metrics cpu memory disk -a -r 5
 ```
 
 ---
