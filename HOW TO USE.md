@@ -43,7 +43,14 @@ go run main.go start -d
 ![Docker Dashboard](examples/docker_dashboard.png)
 *Docker container and image monitoring*
 
-### 4. Running from release
+### 4. Detached Mode (Background)
+To run the dashboard server in the background without keeping the terminal open:
+```bash
+go run main.go start -D
+```
+The application will print the PID of the background process, which you can use to identify or terminate it later.
+
+### 5. Running from release
 You can download the latest release from [GitHub Releases](https://github.com/Techtacles/system-monitoring/releases).
 
 #### MacOS
