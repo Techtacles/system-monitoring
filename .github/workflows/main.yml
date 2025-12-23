@@ -10,6 +10,7 @@ on:
      - "go.mod"
      - "go.sum"
      - "README.md"
+     - "examples/**"
 
 jobs:
   build:

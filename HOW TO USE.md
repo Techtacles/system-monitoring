@@ -5,7 +5,7 @@ This guide provides instructions on how to effectively use the **System Monitori
 ## Quick Start
 1. **Clone and Setup:**
    ```bash
-   git clone <repository-url>
+   git clone https://github.com/Techtacles/system-monitoring.git
    cd system-monitoring
    go mod download
    ```
@@ -16,71 +16,12 @@ This guide provides instructions on how to effectively use the **System Monitori
 3. **View in Browser:** Open [http://localhost:8080](http://localhost:8080)
 
 ---
+
 ## Web Dashboard Usage
-The dashboard provides a visual overview of your system health with live-updating charts. You can download the latest release from [GitHub Releases](https://github.com/Techtacles/system-monitoring/releases).
-### Running from release
+The dashboard provides a visual overview of your system health with live-updating charts.
 
-Go to the latest release at https://github.com/Techtacles/system-monitoring/releases
-
-```bash
-
-
-# Run the binary for linux
-chmod +x sysmon-linux
-
-./sysmon-linux start
-
-# Run with custom port
-./sysmon-linux start --port 5555
-OR 
-./sysmon-linux start -p 5555
-
-# Run with docker metrics
-./sysmon-linux start -d
-
-# Start and add docker metrics to the dashboard and run on a specific port
-./sysmon-linux start -d -p 5555
-
-
-#RUNNING THE BINARY for Windows
-#Run with default 8080 port
-sysmon-windows start
-#Start with docker telemetry: make sure docker is running first
-sysmon-windows start -d 
-#start with custom port
-sysmon-windows start -p 5000
-# Start and add docker metrics to the dashboard and run on a specific port
-sysmon-windows start -d -p 5000 
-
-
-#RUNNING THE BINARY for MacOS
-chmod +x sysmon-darwin
-xattr -d com.apple.quarantine sysmon-darwin
-#Run with default 8080 port
-./sysmon-darwin start
-#Start with docker telemetry: make sure docker is running first
-./sysmon-darwin start -d
-#start with custom port
-./sysmon-darwin start -p 5555
-
-# Start and add docker metrics to the dashboard and run on a specific port
-./sysmon-darwin start -d -p 5555
-
-```
-
-If your OS is Apple, and you download the binary from the latest artifact, it might sometimes get flagged. To resolve this, run the command: 
-```bash
-chmod +x sysmon-darwin
-xattr -d com.apple.quarantine sysmon-darwin
-```
-Once running, open your browser and navigate to `http://localhost:8080` (or your custom port) to view the dashboard.
-
-Another way to run it is by cloning the repo:
-
-```bash
-git clone https://github.com/Techtacles/system-monitoring.git
-cd system-monitoring
-```
+![Usage Dashboard](examples/usage_dashboard.png)
+*Visual System Health Monitoring*
 
 ### 1. Start the Server
 ```bash
@@ -99,16 +40,37 @@ To include Docker metrics (containers, images, volumes) in your dashboard, make 
 go run main.go start -d
 ```
 
-### 4. Combining commands
-You can combine commands to run the dashboard on a different port and include Docker metrics:
+![Docker Dashboard](examples/docker_dashboard.png)
+*Docker container and image monitoring*
+
+### 4. Running from release
+You can download the latest release from [GitHub Releases](https://github.com/Techtacles/system-monitoring/releases).
+
+#### MacOS
 ```bash
-go run main.go start -d -p 9090
+chmod +x sysmon-darwin
+xattr -d com.apple.quarantine sysmon-darwin
+./sysmon-darwin start
+```
+
+#### Linux
+```bash
+chmod +x sysmon-linux
+./sysmon-linux start
+```
+
+#### Windows
+```powershell
+.\sysmon-windows.exe start
 ```
 
 ---
 
-##   (CLI) Usage
+## terminal (CLI) Usage
 You can retrieve real-time metrics directly in your terminal using the `get_metrics` command. These are displayed in a clean, human-readable table format.
+
+![CLI Usage](examples/cli_usage.png)
+*Formatted CLI output for CPU metrics*
 
 ### 1. Basic Commands
 To get a single snapshot of specific metrics:
@@ -128,25 +90,23 @@ To see all available system metrics at once:
 go run main.go get_metrics all
 ```
 
-
-
 ### 3. Real-time Auto-Refresh
 You can turn the CLI into a live monitor by adding the `-a` (auto) and `-r` (refresh interval) flags:
 ```bash
-# Refresh CPU metrics every 2 seconds
-go run main.go get_metrics cpu -a -r 2
+# Refresh CPU metrics every 5 seconds
+go run main.go get_metrics cpu -a -r 5
 
 # Monitor all metrics every 10 seconds
 go run main.go get_metrics all -a -r 10
 ```
+
 ### 4. Combining commands
-You can combine commands to run the CLI in auto refresh mode, include docker metrics and refresh intervals. For example, the code below will run the CLI in auto refresh mode, include docker metrics and refresh intervals every 5 seconds:
+You can combine specific metrics and flags. For example, to monitor CPU, memory, and docker metrics every 5 seconds:
 ```bash
-go run main.go get_metrics cpu memory network docker -d  -a -r 5
+go run main.go get_metrics cpu memory docker -d -a -r 5
 ```
+
 ---
-
-
 
 ## Metric Breakdown
 | Metric | Description |

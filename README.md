@@ -7,6 +7,15 @@ A lightweight, Go-based system monitoring agent designed to collect and analyze 
 
 This project provides a modular framework for gathering system telemetry. It leverages `gopsutil` for cross-platform metric collection and includes a structured logging system. The agent is designed to be extensible, with a  dashboard for real-time visualization. This dashboard refreshes every 30 seconds.
 
+![Usage Dashboard](examples/usage_dashboard.png)
+*Real-time System Usage Dashboard*
+
+![Docker Dashboard](examples/docker_dashboard.png)
+*Docker Resource Monitoring*
+
+![Network Tab](examples/network_tab.png)
+*Detailed Network Interface and Connection Stats*
+
 ## Features
 
 - **CPU Monitoring**:
