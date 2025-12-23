@@ -99,6 +99,8 @@ go run main.go start
 go run main.go start --port 9090
 
 # Start and add docker metrics to the dashboard
+go run main.go start --docker 
+OR
 go run main.go start -d
 
 # Start the dashboard in the background (detached mode)
