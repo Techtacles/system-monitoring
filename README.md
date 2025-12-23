@@ -37,6 +37,7 @@ First, ensure that docker is running locally before running the application with
 - **Modular Architecture**:
   - Separation of concerns with dedicated packages for `cpu`, `memory`, `disk`, `network`, `os`, and `docker`.
   - Built-in `aggregator` for metric consolidation.
+  - Formatted CLI reports for terminal-based monitoring.
   - Structured logging via `zerolog`.
 
 ## Project Structure
@@ -103,10 +104,25 @@ OR
 go run main.go start -d
 
 # Start and add docker metrics to the dashboard and run on a specific port
-go run main.go start --docker --port 9090
-OR
 go run main.go start -d -p 9090
 ```
+
+### Using Terminal (CLI)
+You can retrieve real-time metrics directly in your terminal using the `get_metrics` command. These are displayed in a clean, human-readable table format.
+
+```bash
+# Get a snapshot of specific metrics (cpu, memory, disk, network, etc.)
+go run main.go get_metrics cpu
+
+# Get all available system metrics at once
+go run main.go get_metrics all
+
+# Monitor all metrics with auto-refresh every 5 seconds
+go run main.go get_metrics all -a -r 5
+```
+
+![CLI Usage](examples/cli_usage.png)
+*Formatted CLI output for CPU metrics*
 
 ### Building the Binary
 
