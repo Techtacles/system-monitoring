@@ -107,22 +107,7 @@ go run main.go start -d
 go run main.go start -d -p 9090
 ```
 
-### Using Terminal (CLI)
-You can retrieve real-time metrics directly in your terminal using the `get_metrics` command. These are displayed in a clean, human-readable table format.
 
-```bash
-# Get a snapshot of specific metrics (cpu, memory, disk, network, etc.)
-go run main.go get_metrics cpu
-
-# Get all available system metrics at once
-go run main.go get_metrics all
-
-# Monitor all metrics with auto-refresh every 5 seconds
-go run main.go get_metrics all -a -r 5
-```
-
-![CLI Usage](examples/cli_usage.png)
-*Formatted CLI output for CPU metrics*
 
 ### Building the Binary
 
@@ -195,6 +180,24 @@ xattr -d com.apple.quarantine sysmon-darwin
 ```
 Once running, open your browser and navigate to `http://localhost:8080` (or your custom port) to view the dashboard.
 
+### Using Terminal (CLI)
+You can retrieve real-time metrics directly in your terminal using the `get_metrics` command. These are displayed in a clean, human-readable table format.
+
+```bash
+# Get a snapshot of specific metrics (cpu, memory, disk, network, etc.)
+go run main.go get_metrics cpu
+
+# Get all available system metrics at once
+go run main.go get_metrics all
+
+# Monitor all metrics with auto-refresh every 5 seconds
+go run main.go get_metrics all -a -r 5
+```
+
+![CLI Usage](examples/cli_usage.png)
+*Formatted CLI output for CPU metrics*
+
+You can get more details in the how to use section of the README.md link: [How to use](HOW TO USE.md)
 
 ## Future enhancements
 
