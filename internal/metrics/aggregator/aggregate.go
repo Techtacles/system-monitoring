@@ -8,6 +8,7 @@ import (
 	"github.com/techtacles/sysmonitoring/internal/metrics/disk"
 	"github.com/techtacles/sysmonitoring/internal/metrics/docker"
 	"github.com/techtacles/sysmonitoring/internal/metrics/host"
+	"github.com/techtacles/sysmonitoring/internal/metrics/kubernetes"
 	"github.com/techtacles/sysmonitoring/internal/metrics/memory"
 	"github.com/techtacles/sysmonitoring/internal/metrics/network"
 	"github.com/techtacles/sysmonitoring/internal/metrics/user"
@@ -16,15 +17,19 @@ import (
 const logtag = "aggregator"
 
 type Aggregator struct {
-	mu           sync.RWMutex
-	allMetrics   map[string]interface{}
-	enableDocker bool
+	mu               sync.RWMutex
+	allMetrics       map[string]interface{}
+	enableDocker     bool
+	enableKubernetes bool
+	kubeconfigPath   string
 }
 
-func NewAggregator(enableDocker bool) *Aggregator {
+func NewAggregator(enableDocker, enableKubernetes bool, kubeconfigPath string) *Aggregator {
 	return &Aggregator{
-		allMetrics:   make(map[string]interface{}),
-		enableDocker: enableDocker,
+		allMetrics:       make(map[string]interface{}),
+		enableDocker:     enableDocker,
+		enableKubernetes: enableKubernetes,
+		kubeconfigPath:   kubeconfigPath,
 	}
 }
 
@@ -53,6 +58,11 @@ func (a *Aggregator) CollectAll() map[string]error {
 	if a.enableDocker {
 		if err := a.CollectDocker(); err != nil {
 			errors["docker"] = err
+		}
+	}
+	if a.enableKubernetes {
+		if err := a.CollectKubernetes(); err != nil {
+			errors["kubernetes"] = err
 		}
 	}
 
@@ -85,6 +95,13 @@ func (a *Aggregator) CollectAllConcurrent() map[string]error {
 			name string
 			fn   func() error
 		}{"docker", a.CollectDocker})
+	}
+
+	if a.enableKubernetes {
+		collectors = append(collectors, struct {
+			name string
+			fn   func() error
+		}{"kubernetes", a.CollectKubernetes})
 	}
 
 	for _, collector := range collectors {
@@ -223,6 +240,24 @@ func (a *Aggregator) CollectDocker() error {
 	a.mu.Unlock()
 
 	logging.Info(logtag, "successfully collected docker metrics")
+	return nil
+}
+
+func (a *Aggregator) CollectKubernetes() error {
+	logging.Info(logtag, "collecting kubernetes metrics")
+
+	kubernetes.ExplicitKubeconfigPath = a.kubeconfigPath
+	k := kubernetes.KubeInfo{}
+	if err := k.Collect(); err != nil {
+		logging.Error(logtag, "error collecting kubernetes metrics", err)
+		return err
+	}
+
+	a.mu.Lock()
+	a.allMetrics["kubernetes"] = k
+	a.mu.Unlock()
+
+	logging.Info(logtag, "successfully collected kubernetes metrics")
 	return nil
 }
 

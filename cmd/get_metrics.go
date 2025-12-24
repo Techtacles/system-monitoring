@@ -15,6 +15,7 @@ import (
 	"github.com/techtacles/sysmonitoring/internal/metrics/disk"
 	"github.com/techtacles/sysmonitoring/internal/metrics/docker"
 	"github.com/techtacles/sysmonitoring/internal/metrics/host"
+	"github.com/techtacles/sysmonitoring/internal/metrics/kubernetes"
 	"github.com/techtacles/sysmonitoring/internal/metrics/memory"
 	"github.com/techtacles/sysmonitoring/internal/metrics/network"
 	"github.com/techtacles/sysmonitoring/internal/metrics/user"
@@ -24,21 +25,22 @@ const metricsLogTag = "get_metrics"
 
 var collectAutoRefresh bool
 var refreshInterval int
+var getKubeconfigPath string
 
 var GetMetricCmd = &cobra.Command{
 	Use:   "get_metrics",
 	Short: "Get a particular metric",
-	Long:  `Get a particular metric. Can take in args like cpu, disk, host, memory, network, user, docker, all`,
+	Long:  `Get a particular metric. Can take in args like cpu, disk, host, memory, network, user, docker, all, kubernetes`,
 	RunE: func(cmd *cobra.Command, args []string) error {
 		if len(args) == 0 {
-			logging.Info(metricsLogTag, "No metrics passed in. Please ensure metrics is either: cpu, disk, host, memory, network, user, docker, all")
+			logging.Info(metricsLogTag, "No metrics passed in. Please ensure metrics is either: cpu, disk, host, memory, network, user, docker, all, kubernetes")
 			return nil
 		}
 
-		newAgg := aggregator.NewAggregator(collectDocker)
+		newAgg := aggregator.NewAggregator(false, false, getKubeconfigPath)
 		metricList := args
 		if len(args) == 1 && args[0] == "all" {
-			metricList = []string{"cpu", "memory", "disk", "host", "network", "user", "docker"}
+			metricList = []string{"cpu", "memory", "disk", "host", "network", "user", "docker", "kubernetes"}
 		}
 
 		collectAndPrint := func() {
@@ -59,6 +61,8 @@ var GetMetricCmd = &cobra.Command{
 					err = newAgg.CollectUser()
 				case "docker":
 					err = newAgg.CollectDocker()
+				case "kubernetes":
+					err = newAgg.CollectKubernetes()
 				}
 
 				if err != nil {
@@ -132,6 +136,12 @@ func printMetric(name string, result interface{}) {
 		} else {
 			fmt.Printf("%+v\n", result)
 		}
+	case "kubernetes":
+		if info, ok := result.(kubernetes.KubeInfo); ok {
+			printKubernetesTable(info)
+		} else {
+			fmt.Printf("%+v\n", result)
+		}
 	default:
 		fmt.Printf("%+v\n", result)
 	}
@@ -180,6 +190,43 @@ func printCPUTable(info cpu.CpuInfo) {
 			fmt.Fprintf(w, "%d\t%s\t%.2f%%\t%d\t%s\n", p.Pid, p.ProcessName, p.CpuPercent, p.NumThreads, p.Username)
 		}
 		w.Flush()
+	}
+}
+
+func printKubernetesTable(info kubernetes.KubeInfo) {
+	fmt.Printf("Summary: %d Nodes, %d Pods, %d Services, %d Deployments\n",
+		len(info.NodeStats), len(info.PodStats), len(info.ServiceStats), len(info.DeploymentStats))
+
+	if len(info.NodeStats) > 0 {
+		fmt.Println("\nNodes:")
+		w := tabwriter.NewWriter(os.Stdout, 0, 0, 2, ' ', tabwriter.Debug)
+		fmt.Fprintln(w, "Name\tStatus\tAge")
+		for _, n := range info.NodeStats {
+			status := "Ready"
+			if n.Unschedulable {
+				status = "Unschedulable"
+			}
+			fmt.Fprintf(w, "%s\t%s\t%s\n", n.Name, status, time.Since(n.CreationTimestamp).Round(time.Second))
+		}
+		w.Flush()
+	}
+
+	if len(info.PodStats) > 0 {
+		fmt.Println("\nPods (Top 10):")
+		w := tabwriter.NewWriter(os.Stdout, 0, 0, 2, ' ', tabwriter.Debug)
+		fmt.Fprintln(w, "Namespace\tName\tPhase\tIP\tNode")
+		displayPods := info.PodStats
+		if len(displayPods) > 10 {
+			displayPods = displayPods[:10]
+		}
+		for _, p := range displayPods {
+			fmt.Fprintf(w, "%s\t%s\t%s\t%s\t%s\n", p.Namespace, p.Name, p.Phase, p.PodIP, p.NodeName)
+		}
+		w.Flush()
+	}
+
+	if len(info.PersistentVolumeStats) > 0 || len(info.PersistentVolumeClaimStats) > 0 {
+		fmt.Printf("\nStorage: %d PVs, %d PVCs\n", len(info.PersistentVolumeStats), len(info.PersistentVolumeClaimStats))
 	}
 }
 
@@ -323,5 +370,6 @@ func init() {
 	rootCmd.AddCommand(GetMetricCmd)
 	GetMetricCmd.Flags().BoolVarP(&collectAutoRefresh, "auto", "a", false, "Whether to autorefresh every 30 seconds")
 	GetMetricCmd.Flags().IntVarP(&refreshInterval, "refresh", "r", 30, "Number of seconds to autorefresh")
+	GetMetricCmd.Flags().StringVarP(&getKubeconfigPath, "kubeconfig", "", "", "absolute path to the kubeconfig file (optional)")
 	GetMetricCmd.Flags().BoolVarP(&collectDocker, "docker", "d", false, "Whether to collect docker metrics. Make sure docker is running when passing this flag")
 }

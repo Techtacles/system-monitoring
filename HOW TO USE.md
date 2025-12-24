@@ -43,7 +43,20 @@ go run main.go start -d
 ![Docker Dashboard](examples/docker_dashboard.png)
 *Docker container and image monitoring*
 
-### 4. Detached Mode (Background)
+### 4. Kubernetes Telemetry
+To include Kubernetes metrics (Nodes, Pods, Services, Storage) in your dashboard, use the `-k` flag. You can also specify a custom `kubeconfig` path:
+```bash
+# Default kubeconfig (~/.kube/config)
+go run main.go start -k
+
+# Custom kubeconfig path
+go run main.go start -k --kubeconfig /path/to/kube/config
+```
+
+![Kubernetes Dashboard](examples/kubernetes.png)
+*Kubernetes cluster monitoring (Nodes, Pods, Services, PV/PVCs)*
+
+### 5. Detached Mode (Background)
 To run the dashboard server in the background without keeping the terminal open:
 ```bash
 go run main.go start -D
@@ -87,11 +100,18 @@ go run main.go get_metrics memory
 go run main.go get_metrics disk
 go run main.go get_metrics network
 go run main.go get_metrics docker
+go run main.go get_metrics kubernetes
 go run main.go get_metrics host
 go run main.go get_metrics user
 ```
 
-### 2. Monitoring All Metrics
+### 2. Custom Kubeconfig
+When fetching Kubernetes metrics, you can provide a custom config path:
+```bash
+go run main.go get_metrics kubernetes --kubeconfig /path/to/kube/config
+```
+
+### 3. Monitoring All Metrics
 To see all available system metrics at once:
 ```bash
 go run main.go get_metrics all
@@ -165,6 +185,7 @@ Download the release for your OS from [GitHub Releases](https://github.com/Techt
 | **Host** | Uptime, Kernel version, and Load Averages (1m, 5m, 15m). |
 | **User** | Current logged-in user details and system architecture. |
 | **Docker** | Container status, Image sizes, and Docker-specific resource usage. |
+| **Kubernetes** | Node status, Pod phases, Service/Deployment summary, and PV/PVC monitoring. |
 
 ---
 

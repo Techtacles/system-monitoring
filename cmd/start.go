@@ -12,8 +12,10 @@ import (
 
 var logtag string = "cmd"
 
+var kubeconfigpath string
 var collectDocker bool
 var isDetached bool
+var collectKubernetes bool
 
 var RunCmd = &cobra.Command{
 	Use:   "start",
@@ -50,7 +52,10 @@ var RunCmd = &cobra.Command{
 		}
 
 		logging.Info(logtag, "running dashboard server")
-		return dashboard.Run(collectDocker)
+		if err := dashboard.Run(collectDocker, collectKubernetes, kubeconfigpath); err != nil {
+			return err
+		}
+		return nil
 	},
 }
 
@@ -58,5 +63,7 @@ func init() {
 	rootCmd.AddCommand(RunCmd)
 	RunCmd.Flags().StringVarP(&dashboard.Port, "port", "p", "8080", "Port to run the dashboard server on")
 	RunCmd.Flags().BoolVarP(&collectDocker, "docker", "d", false, "Whether to collect docker metrics. Make sure docker is running when passing this flag")
+	RunCmd.Flags().BoolVarP(&collectKubernetes, "kubernetes", "k", false, "Whether to collect kubernetes metrics.")
+	RunCmd.Flags().StringVarP(&kubeconfigpath, "kubeconfig", "", "", "absolute path to the kubeconfig file (optional)")
 	RunCmd.Flags().BoolVarP(&isDetached, "detached", "D", false, "Run the dashboard server in the background")
 }

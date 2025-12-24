@@ -526,8 +526,148 @@ async function updateData() {
             dockerSection.style.display = 'none';
         }
 
+        // Update Kubernetes
+        const k8sSection = document.getElementById('kubernetes-section');
+        if (data.kubernetes) {
+            k8sSection.style.display = 'block';
+            const k = data.kubernetes;
+
+            // Nodes
+            if (k.NodeStats) {
+                let html = '';
+                k.NodeStats.forEach(n => {
+                    const addresses = n.Addressed ? n.Addressed.map(a => `<span class="badge">${a.Type}: ${a.Address}</span>`).join(' ') : 'none';
+                    html += `<tr>
+                        <td>${n.Name}</td>
+                        <td><span class="badge" style="background:${n.Unschedulable ? '#b91c1c' : '#059669'}">${n.Unschedulable ? 'Unschedulable' : 'Ready'}</span></td>
+                        <td>${addresses}</td>
+                        <td>${formatAge(n.CreationTimestamp)}</td>
+                    </tr>`;
+                });
+                document.getElementById('k8s-nodes-body').innerHTML = html || '<tr><td colspan="4">No nodes found</td></tr>';
+            }
+
+            // Pods
+            if (k.PodStats) {
+                let html = '';
+                k.PodStats.forEach(p => {
+                    html += `<tr>
+                        <td><span class="badge">${p.Namespace}</span></td>
+                        <td>${p.Name}</td>
+                        <td><span class="badge" style="background:${getPodPhaseColor(p.Phase)}">${p.Phase}</span></td>
+                        <td>${p.PodIP || 'N/A'}</td>
+                        <td>${p.NodeName || 'N/A'}</td>
+                        <td>${formatAge(p.CreationTimestamp)}</td>
+                    </tr>`;
+                });
+                document.getElementById('k8s-pods-body').innerHTML = html || '<tr><td colspan="6">No pods found</td></tr>';
+            }
+
+            // Services
+            if (k.ServiceStats) {
+                let html = '';
+                k.ServiceStats.forEach(s => {
+                    const ports = s.Port ? `${s.Port}/${s.Protocol}${s.NodePort ? ` (NodePort: ${s.NodePort})` : ''}` : 'N/A';
+                    html += `<tr>
+                        <td><span class="badge">${s.Namespace}</span></td>
+                        <td>${s.Name}</td>
+                        <td>${s.Type}</td>
+                        <td>${s.ClusterIp || 'N/A'}</td>
+                        <td>${ports}</td>
+                    </tr>`;
+                });
+                document.getElementById('k8s-services-body').innerHTML = html || '<tr><td colspan="5">No services found</td></tr>';
+            }
+
+            // Deployments
+            if (k.DeploymentStats) {
+                let html = '';
+                k.DeploymentStats.forEach(d => {
+                    html += `<tr>
+                        <td><span class="badge">${d.Namespace}</span></td>
+                        <td>${d.Name}</td>
+                        <td>${d.UpdatedReplicas} / ${d.TotalReplicas}</td>
+                    </tr>`;
+                });
+                document.getElementById('k8s-deployments-body').innerHTML = html || '<tr><td colspan="3">No deployments found</td></tr>';
+            }
+
+            // Persistent Volumes
+            if (k.PersistentVolumeStats) {
+                let html = '';
+                k.PersistentVolumeStats.forEach(pv => {
+                    const capacity = pv.Capacity ? Object.entries(pv.Capacity).map(([k, v]) => `${v.string}`).join(', ') : 'N/A';
+                    html += `<tr>
+                        <td>${pv.Name}</td>
+                        <td>${capacity}</td>
+                        <td>${pv.AccessModes ? pv.AccessModes.join(', ') : 'N/A'}</td>
+                        <td>${pv.ReclaimPolicy}</td>
+                        <td><span class="badge" style="background:${getPVStatusColor(pv.Status)}">${pv.Status}</span></td>
+                        <td>${pv.ClaimRef ? `${pv.ClaimRef.namespace}/${pv.ClaimRef.name}` : 'N/A'}</td>
+                        <td>${pv.StorageClassName || 'N/A'}</td>
+                    </tr>`;
+                });
+                document.getElementById('k8s-pvs-body').innerHTML = html || '<tr><td colspan="7">No PVs found</td></tr>';
+            }
+
+            // Persistent Volume Claims
+            if (k.PersistentVolumeClaimStats) {
+                let html = '';
+                k.PersistentVolumeClaimStats.forEach(pvc => {
+                    const capacity = pvc.Capacity ? Object.entries(pvc.Capacity).map(([k, v]) => `${v.string}`).join(', ') : 'N/A';
+                    html += `<tr>
+                        <td><span class="badge">${pvc.Namespace}</span></td>
+                        <td>${pvc.Name}</td>
+                        <td><span class="badge" style="background:${getPVStatusColor(pvc.Status)}">${pvc.Status}</span></td>
+                        <td>${pvc.VolumeName || 'N/A'}</td>
+                        <td>${capacity}</td>
+                    </tr>`;
+                });
+                document.getElementById('k8s-pvcs-body').innerHTML = html || '<tr><td colspan="5">No PVCs found</td></tr>';
+            }
+
+        } else {
+            k8sSection.style.display = 'none';
+        }
+
     } catch (err) {
         console.error("Error fetching metrics:", err);
+    }
+}
+
+function formatAge(timestamp) {
+    if (!timestamp) return 'N/A';
+    const start = new Date(timestamp);
+    const now = new Date();
+    const diffMs = now - start;
+    const diffSec = Math.floor(diffMs / 1000);
+    if (diffSec < 60) return diffSec + 's';
+    const diffMin = Math.floor(diffSec / 60);
+    if (diffMin < 60) return diffMin + 'm';
+    const diffHour = Math.floor(diffMin / 60);
+    if (diffHour < 24) return diffHour + 'h';
+    const diffDay = Math.floor(diffHour / 24);
+    return diffDay + 'd';
+}
+
+function getPodPhaseColor(phase) {
+    switch (phase) {
+        case 'Running': return '#059669';
+        case 'Pending': return '#f59e0b';
+        case 'Succeeded': return '#3b82f6';
+        case 'Failed': return '#b91c1c';
+        case 'Unknown': return '#6b7280';
+        default: return '#6b7280';
+    }
+}
+
+function getPVStatusColor(status) {
+    switch (status) {
+        case 'Bound': return '#059669';
+        case 'Available': return '#3b82f6';
+        case 'Released': return '#f59e0b';
+        case 'Failed': return '#b91c1c';
+        default: return '#6b7280';
     }
 }
 

@@ -346,6 +346,159 @@
                 </div>
             </div>
         </div>
+
+        <div id="kubernetes-section" style="display: none;">
+            <div class="section-header">Kubernetes Overview</div>
+            <div class="grid">
+                <div class="card" style="grid-column: span 3;">
+                    <div class="card-header">
+                        <span class="card-title">Nodes</span>
+                    </div>
+                    <div class="table-container" style="max-height: 250px;">
+                        <table>
+                            <thead>
+                                <tr>
+                                    <th>Name</th>
+                                    <th>Status</th>
+                                    <th>Addresses</th>
+                                    <th>Age</th>
+                                </tr>
+                            </thead>
+                            <tbody id="k8s-nodes-body">
+                                <tr>
+                                    <td colspan="4">Loading...</td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+
+            <div class="grid">
+                <div class="card" style="grid-column: span 3;">
+                    <div class="card-header">
+                        <span class="card-title">Pods</span>
+                    </div>
+                    <div class="table-container" style="max-height: 400px;">
+                        <table>
+                            <thead>
+                                <tr>
+                                    <th>Namespace</th>
+                                    <th>Name</th>
+                                    <th>Phase</th>
+                                    <th>IP</th>
+                                    <th>Node</th>
+                                    <th>Age</th>
+                                </tr>
+                            </thead>
+                            <tbody id="k8s-pods-body">
+                                <tr>
+                                    <td colspan="6">Loading...</td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+
+            <div class="grid">
+                <div class="card" style="grid-column: span 2;">
+                    <div class="card-header">
+                        <span class="card-title">Services</span>
+                    </div>
+                    <div class="table-container" style="max-height: 300px;">
+                        <table>
+                            <thead>
+                                <tr>
+                                    <th>Namespace</th>
+                                    <th>Name</th>
+                                    <th>Type</th>
+                                    <th>Cluster IP</th>
+                                    <th>Ports</th>
+                                </tr>
+                            </thead>
+                            <tbody id="k8s-services-body">
+                                <tr>
+                                    <td colspan="5">Loading...</td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+                <div class="card" style="grid-column: span 1;">
+                    <div class="card-header">
+                        <span class="card-title">Deployments</span>
+                    </div>
+                    <div class="table-container" style="max-height: 300px;">
+                        <table>
+                            <thead>
+                                <tr>
+                                    <th>Namespace</th>
+                                    <th>Name</th>
+                                    <th>Replicas (U/T)</th>
+                                </tr>
+                            </thead>
+                            <tbody id="k8s-deployments-body">
+                                <tr>
+                                    <td colspan="3">Loading...</td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+
+            <div class="grid">
+                <div class="card" style="grid-column: span 2;">
+                    <div class="card-header">
+                        <span class="card-title">Persistent Volumes</span>
+                    </div>
+                    <div class="table-container" style="max-height: 300px;">
+                        <table>
+                            <thead>
+                                <tr>
+                                    <th>Name</th>
+                                    <th>Capacity</th>
+                                    <th>Access Modes</th>
+                                    <th>Reclaim Policy</th>
+                                    <th>Status</th>
+                                    <th>Claim</th>
+                                    <th>StorageClass</th>
+                                </tr>
+                            </thead>
+                            <tbody id="k8s-pvs-body">
+                                <tr>
+                                    <td colspan="7">Loading...</td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+                <div class="card" style="grid-column: span 1;">
+                    <div class="card-header">
+                        <span class="card-title">Persistent Volume Claims</span>
+                    </div>
+                    <div class="table-container" style="max-height: 300px;">
+                        <table>
+                            <thead>
+                                <tr>
+                                    <th>Namespace</th>
+                                    <th>Name</th>
+                                    <th>Status</th>
+                                    <th>Volume</th>
+                                    <th>Capacity</th>
+                                </tr>
+                            </thead>
+                            <tbody id="k8s-pvcs-body">
+                                <tr>
+                                    <td colspan="5">Loading...</td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
     </div>
 
     <script src="/web/js/script.js"></script>
