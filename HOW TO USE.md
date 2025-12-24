@@ -45,6 +45,7 @@ go run main.go start -d
 
 ### 4. Kubernetes Telemetry
 To include Kubernetes metrics (Nodes, Pods, Services, Storage) in your dashboard, use the `-k` flag. You can also specify a custom `kubeconfig` path:
+To use kubernetes, make sure your kubernetes server (either minikube or your custom server) is running.
 ```bash
 # Default kubeconfig (~/.kube/config)
 go run main.go start -k
