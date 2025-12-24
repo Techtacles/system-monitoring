@@ -16,6 +16,9 @@ This project provides a modular framework for gathering system telemetry. It lev
 ![Network Tab](examples/network_tab.png)
 *Detailed Network Interface and Connection Stats*
 
+![Kubernetes Dashboard](examples/kubernetes.png)
+*Kubernetes Cluster Monitoring*
+
 ## Features
 
 - **CPU Monitoring**:
@@ -33,6 +36,13 @@ First, ensure that docker is running locally before running the application with
     - **Containers**: Image names, current state, root size, and port mappings.
     - **Images**: Repository tags, Image IDs, virtual size, and creation dates.
     - **Volumes**: Volume names, drivers, mountpoints, and disk space usage.
+
+- **Kubernetes Monitoring** (Optional with `-k` flag):
+  - **Node Insights**: Status, internal/external addresses, and age.
+  - **Pod Management**: Tracking pod phases (Running, Pending, Succeeded, Failed), IP addresses, and host nodes across all namespaces.
+  - **Resource Status**: Summary of Services and Deployments with replica counts.
+  - **Storage Deep-Dive**: Monitoring Persistent Volumes (PVs) and Persistent Volume Claims (PVCs) including capacity, access modes, and reclaim policies.
+  - **Custom Config**: Support for custom `kubeconfig` paths via `--kubeconfig` flag.
 
 - **Modular Architecture**:
   - Separation of concerns with dedicated packages for `cpu`, `memory`, `disk`, `network`, `os`, and `docker`.
@@ -103,11 +113,17 @@ go run main.go start --docker
 OR
 go run main.go start -d
 
+# Start and add kubernetes metrics to the dashboard
+go run main.go start -k
+
+# Start with a specific kubeconfig path
+go run main.go start -k --kubeconfig /path/to/kube/config
+
 # Start the dashboard in the background (detached mode)
 go run main.go start -D
 
-# Start and add docker metrics to the dashboard and run on a specific port
-go run main.go start -d -p 9090
+# Start with docker and kubernetes metrics on a specific port
+go run main.go start -d -k -p 9090
 ```
 
 
@@ -205,7 +221,6 @@ You can get more details in the how to use section of the README.md link: [How t
 ## Future enhancements
 
 - Add cloud integrations like AWS, GCP, Azure: Load balancers, VMs, Databases, ECS
-- Add Kubernetes integration
 - Add more features to the dashboard
 - Add alerting
 - Connect to slack/teams/webhook for notifications

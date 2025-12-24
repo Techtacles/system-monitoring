@@ -23,8 +23,8 @@ var Port string = "8080"
 var imagesDir embed.FS
 
 // Run starts the dashboard server
-func Run(enableDocker bool) error {
-	ag := aggregator.NewAggregator(enableDocker)
+func Run(enableDocker, enableKubernetes bool, kubeconfigPath string) error {
+	ag := aggregator.NewAggregator(enableDocker, enableKubernetes, kubeconfigPath)
 
 	logging.Info(logtag, "performing initial metrics collection")
 	ag.CollectAllConcurrent()
