@@ -49,7 +49,9 @@ First, ensure that docker is running locally before running the application with
   - Built-in `aggregator` for metric consolidation.
   - Formatted CLI reports for terminal-based monitoring.
   - Structured logging via `zerolog`.
-
+- **Export**:
+  - Export dashboard as JSON, Image, PDF, Excal
+  
 ## Project Structure
 
 ```
