@@ -671,6 +671,43 @@ function getPVStatusColor(status) {
     }
 }
 
+// Export Functionality
+document.getElementById('export-json').addEventListener('click', (e) => {
+    e.preventDefault();
+    window.location.href = '/api/report?format=json';
+});
+
+document.getElementById('export-csv').addEventListener('click', (e) => {
+    e.preventDefault();
+    window.location.href = '/api/report?format=csv';
+});
+
+document.getElementById('export-pdf').addEventListener('click', (e) => {
+    e.preventDefault();
+    window.location.href = '/api/report?format=pdf';
+});
+
+document.getElementById('export-img').addEventListener('click', (e) => {
+    e.preventDefault();
+    const container = document.getElementById('dashboard-container');
+    const exportBtn = document.querySelector('.dropdown');
+
+    // Temporarily hide dropdown for clean capture
+    exportBtn.style.opacity = '0';
+
+    html2canvas(container, {
+        backgroundColor: '#0f172a', // Match --bg-color
+        scale: 2, // Higher resolution
+        logging: false
+    }).then(canvas => {
+        const link = document.createElement('a');
+        link.download = `sysmon-snapshot-${new Date().toISOString().split('.')[0].replace(/:/g, '-')}.png`;
+        link.href = canvas.toDataURL('image/png');
+        link.click();
+        exportBtn.style.opacity = '1';
+    });
+});
+
 initCharts();
 updateData();
 setInterval(updateData, 5000);

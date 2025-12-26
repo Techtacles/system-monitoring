@@ -40,7 +40,7 @@ jobs:
         run: go mod download
 
       - name: Build
-        run: go build -o ${{ matrix.binary }} main.go
+        run: go build -ldflags="-s -w" -o ${{ matrix.binary }} main.go
         env:
           GO_VERSION: ${{ matrix.go-version }}
           CGO_ENABLED: 0
@@ -68,6 +68,3 @@ jobs:
             dist/**/*
         env:
           GITHUB_TOKEN: ${{ secrets.GH_TOKEN }}
-
-        
-
