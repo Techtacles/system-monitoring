@@ -9,16 +9,36 @@
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="/web/css/style.css">
+    <script src="https://cdn.jsdelivr.net/npm/html2canvas@1.4.1/dist/html2canvas.min.js"></script>
 </head>
 
 <body>
-    <div class="container">
+    <div class="container" id="dashboard-container">
         <header>
             <div class="logo-container">
                 <img src="/images/logo.png" alt="System Monitor Logo" class="logo">
                 <h1>System Monitor</h1>
             </div>
-            <div id="connection-status" class="status-badge">Live</div>
+            <div class="header-actions">
+                <div class="dropdown">
+                    <button class="btn btn-primary dropdown-toggle">
+                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                            stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="margin-right: 8px;">
+                            <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
+                            <polyline points="7 10 12 15 17 10"></polyline>
+                            <line x1="12" y1="15" x2="12" y2="3"></line>
+                        </svg>
+                        Export Report
+                    </button>
+                    <div class="dropdown-content">
+                        <a href="#" id="export-json">Download JSON</a>
+                        <a href="#" id="export-csv">Download CSV</a>
+                        <a href="#" id="export-pdf">Download PDF</a>
+                        <a href="#" id="export-img">Save as Image</a>
+                    </div>
+                </div>
+                <div id="connection-status" class="status-badge">Live</div>
+            </div>
         </header>
 
         <div class="section-header">Overview</div>
