@@ -221,8 +221,6 @@ You can get more details in the how to use section of the README.md link: [How t
 ## Future enhancements
 
 - Add cloud integrations like AWS, GCP, Azure: Load balancers, VMs, Databases, ECS
-- Add more features to the dashboard
-- Add alerting
-- Connect to slack/teams/webhook for notifications
+- Add alerting: Connect to slack/teams/webhook for notifications
 - Add time series analysis
 - Add tabs, etc and make the dashboard more user friendly.
