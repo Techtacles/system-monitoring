@@ -16,4 +16,5 @@ echo "New tag:     $NEW_TAG"
 
 git add .
 git commit --allow-empty -m "building release for tag $NEW_TAG"
+git tag $NEW_TAG
 git push origin $NEW_TAG
